@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bosch Safety Observation Report</title>
+    <style>
+        :root {
+            --bosch-red: #ED0007;
+            --bosch-blue: #005691;
+            --bosch-gray: #525F6B;
+            --bosch-light: #EFF1F2;
+            --bosch-black: #191919;
+            --high-risk: #D32F2F;
+            --med-risk: #F57C00;
+            --low-risk: #388E3C;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--bosch-light);
+            margin: 0;
+            padding: 15px;
+            color: var(--bosch-black);
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-top: 10px solid var(--bosch-red);
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        .header h1 {
+            color: var(--bosch-blue);
+            font-size: 22px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: var(--bosch-gray);
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .form-content {
+            padding: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--bosch-blue);
+        }
+
+        label span {
+            font-size: 12px;
+            color: var(--bosch-gray);
+            font-weight: normal;
+            display: block;
+        }
+
+        input[type="text"], input[type="date"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #B9BEB5;
+            border-radius: 2px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: #fafafa;
+        }
+
+        /* Risk Level Selection */
+        .risk-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .risk-option {
+            flex: 1;
+            text-align: center;
+        }
+
+        .risk-option input {
+            display: none;
+        }
+
+        .risk-label {
+            display: block;
+            padding: 12px 5px;
+            border: 1px solid #B9BEB5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            transition: 0.3s;
+            background: #fff;
+        }
+
+        #risk-high:checked + .risk-label { background-color: var(--high-risk); color: white; border-color: var(--high-risk); }
+        #risk-med:checked + .risk-label { background-color: var(--med-risk); color: white; border-color: var(--med-risk); }
+        #risk-low:checked + .risk-label { background-color: var(--low-risk); color: white; border-color: var(--low-risk); }
+
+        /* Important Photo Reminder Box */
+        .photo-reminder {
+            background-color: #FFF3E0;
+            border: 2px solid #FFB74D;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .photo-reminder b {
+            color: #E65100;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+
+        .photo-reminder p {
+            font-size: 12px;
+            margin: 0;
+            color: #5D4037;
+            line-height: 1.5;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background-color: var(--bosch-blue);
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .footer {
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .bosch-logo {
+            font-size: 18px;
+            letter-spacing: 1px;
+            color: var(--bosch-black);
+        }
+
+        .color-bar {
+            height: 6px;
+            width: 100%;
+            background: linear-gradient(to right, #ED0007 25%, #005691 25%, #005691 50%, #525F6B 50%, #525F6B 75%, #B9BEB5 75%);
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Safety Observation</h1>
+        <p>안전 관찰 보고서</p>
+    </div>
+
+    <div class="form-content">
+        <form id="reportForm">
+            <div class="input-group">
+                <label>Date <span>관찰 날짜</span></label>
+                <input type="date" id="obsDate" required>
+            </div>
+
+            <div class="input-group">
+                <label>Location <span>발견 장소 (Line, Office, etc.)</span></label>
+                <input type="text" id="location" placeholder="e.g. Warehouse A" required>
+            </div>
+
+            <div class="input-group">
+                <label>Risk Level <span>위험수준 평가</span></label>
+                <div class="risk-container">
+                    <div class="risk-option">
+                        <input type="radio" name="risk" value="High (Immediate Action)" id="risk-high" required>
+                        <label for="risk-high" class="risk-label">High<br>즉시 중지</label>
+                    </div>
+                    <div class="risk-option">
+                        <input type="radio" name="risk" value="Medium (Improvement)" id="risk-med">
+                        <label for="risk-med" class="risk-label">Medium<br>개선 필요</label>
+                    </div>
+                    <div class="risk-option">
+                        <input type="radio" name="risk" value="Low (Observation)" id="risk-low">
+                        <label for="risk-low" class="risk-label">Low<br>관찰</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Observation Details <span>상세 내용</span></label>
+                <textarea id="description" rows="5" placeholder="Describe the hazard clearly..." required></textarea>
+            </div>
+
+            <div class="photo-reminder">
+                <b>📸 ATTACH PHOTOS IN YOUR MAIL APP</b>
+                <p>After clicking 'Send', please manually attach the photos in your email application.<br>
+                보고서 전송 버튼 클릭 후, 실행되는 <b>메일 앱에서 사진을 반드시 첨부</b>해 주세요.</p>
+            </div>
+
+            <button type="submit" class="btn-submit">Send Report (보고서 전송)</button>
+        </form>
+    </div>
+
+    <div class="footer">
+        <div class="bosch-logo"><strong>ROBERT BOSCH KOREA</strong></div>
+        <div class="color-bar"></div>
+    </div>
+</div>
+
+<script>
+    // 오늘 날짜를 기본값으로 설정
+    document.getElementById('obsDate').value = new Date().toISOString().substring(0, 10);
+
+    document.getElementById('reportForm').onsubmit = function(e) {
+        e.preventDefault();
+        
+        const date = document.getElementById('obsDate').value;
+        const location = document.getElementById('location').value;
+        const risk = document.querySelector('input[name="risk"]:checked').value;
+        const description = document.getElementById('description').value;
+        const recipient = "jeongsoo.park@kr.bosch.com";
+        
+        const subject = encodeURIComponent(`[Safety Report] ${risk} - ${location}`);
+        const body = encodeURIComponent(
+            `--- Safety Observation Report ---\n\n` +
+            `■ Date (날짜): ${date}\n` +
+            `■ Location (장소): ${location}\n` +
+            `■ Risk Level (위험수준): ${risk}\n\n` +
+            `■ Description (상세내용):\n${description}\n\n` +
+            `----------------------------------\n` +
+            `📢 ACTION REQUIRED: PLEASE ATTACH PHOTOS NOW.\n` +
+            `📢 조치 사항: 지금 바로 사진을 첨부해 주세요.`
+        );
+
+        // Mailto 실행
+        window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
+    };
+</script>
+
+</body>
+</html>
