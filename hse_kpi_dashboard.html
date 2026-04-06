@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
+<html lang="ko"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EHS KPI Management Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="hse_kpi_dashboard_files/css2.css" rel="stylesheet">
+<script src="hse_kpi_dashboard_files/chart.umd.min.js"></script>
 <style>
   :root {
     --bg: #f4f6f9;
@@ -49,14 +49,17 @@
     gap: 20px;
   }
 
-  .logo-badge {
-    background: linear-gradient(135deg, #00e5ff, #2979ff);
-    color: #000;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 14px;
-    letter-spacing: 2px;
-    padding: 4px 10px;
-    border-radius: 4px;
+  .bosch-logo-img {
+    height: 36px;
+    width: auto;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 32px;
+    background: var(--border);
     flex-shrink: 0;
   }
 
@@ -224,7 +227,9 @@
   .status-badge.no-findings { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(41,121,255,0.3); }
 
   .finding-num { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--text-primary); }
-  .finding-num.zero { color: var(--green); }
+  .finding-num.zero  { color: var(--green); }
+  .finding-num.minor { color: var(--amber); }
+  .finding-num.major { color: var(--red); }
 
   footer { text-align: center; padding: 24px; font-size: 11px; color: var(--text-dim); border-top: 1px solid var(--border); margin-top: 40px; }
 
@@ -604,9 +609,10 @@
 
 <!-- HEADER -->
 <header>
-  <div class="logo-badge">EHS</div>
+  <img class="bosch-logo-img" src="data:image/png;base64,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" alt="BOSCH">
+  <div class="header-divider"></div>
   <div class="header-titles">
-    <h1>KPI Management</h1>
+    <h1>EHS KPI MANAGEMENT</h1>
     <p>Safety Key Performance Indicators</p>
   </div>
   <div class="header-meta">
@@ -620,16 +626,16 @@
 
 <!-- TABS -->
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab(0, this)">Section 1 — Lagging</button>
+  <button class="tab-btn" onclick="switchTab(0, this)">Section 1 — Lagging</button>
   <button class="tab-btn" onclick="switchTab(1, this)">Section 2 — Leading</button>
   <button class="tab-btn" onclick="switchTab(2, this)">Section 3 — Activities</button>
-  <button class="tab-btn" onclick="switchTab(3, this)">Section 4 — Audit</button>
+  <button class="tab-btn active" onclick="switchTab(3, this)">Section 4 — Audit</button>
 </div>
 
 <main>
 
 <!-- ══════════════ PAGE 1: LAGGING ══════════════ -->
-<div class="page active" id="page-0">
+<div class="page" id="page-0">
   <div class="section-label"><span>01</span>Safety Lagging Indicators &nbsp;·&nbsp; *2026 (2025)</div>
 
   <div class="grid-5" style="margin-bottom:24px;">
@@ -680,14 +686,14 @@
       <div class="chart-header">
         <div>
           <div class="chart-title">RBKR Gemba walk (with Management)</div>
-          <div class="chart-subtitle">Findings & Improvements · Quarterly</div>
+          <div class="chart-subtitle">Findings &amp; Improvements · Quarterly</div>
         </div>
         <div class="chart-legend">
           <div class="legend-item"><div class="legend-dot" style="background:#2979ff"></div>Findings</div>
           <div class="legend-item"><div class="legend-dot" style="background:#00c853"></div>Improvements</div>
         </div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-inspection"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-inspection" style="display: block; box-sizing: border-box; height: 200px; width: 719px;" width="719" height="200"></canvas></div>
     </div>
 
     <div class="chart-card">
@@ -701,7 +707,7 @@
           <div class="legend-item"><div class="legend-dot" style="background:#76ff03"></div>Yo</div>
         </div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-training"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-training" style="display: block; box-sizing: border-box; height: 200px; width: 719px;" width="719" height="200"></canvas></div>
     </div>
   </div>
 </div>
@@ -714,7 +720,7 @@
     <div class="chart-card">
       <div class="chart-header">
         <div>
-          <div class="chart-title">Near Miss & Safety Observation</div>
+          <div class="chart-title">Near Miss &amp; Safety Observation</div>
           <div class="chart-subtitle">Monthly Trend</div>
         </div>
         <div class="chart-legend">
@@ -722,28 +728,28 @@
           <div class="legend-item"><div class="legend-dot" style="background:#2979ff"></div>Safety Obs.</div>
         </div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-nearmiss"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-nearmiss" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" height="0" width="0"></canvas></div>
     </div>
 
     <div class="chart-card">
       <div class="chart-header">
         <div>
           <div class="chart-title">Risk Distribution by Area</div>
-          <div class="chart-subtitle">2025 vs 2024 · Horizontal Bar</div>
+          <div class="chart-subtitle">2026 vs 2025 · Horizontal Bar</div>
         </div>
         <div class="chart-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:#1565c0"></div>2025</div>
-          <div class="legend-item"><div class="legend-dot" style="background:rgba(21,101,192,0.25)"></div>2024</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1565c0"></div>2026</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(21,101,192,0.25)"></div>2025</div>
         </div>
       </div>
-      <div class="chart-wrap" style="height:240px;"><canvas id="chart-risk"></canvas></div>
+      <div class="chart-wrap" style="height:240px;"><canvas id="chart-risk" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" height="0" width="0"></canvas></div>
     </div>
   </div>
 </div>
 
 <!-- ══════════════ PAGE 3: ACTIVITIES ══════════════ -->
 <div class="page" id="page-2">
-  <div class="section-label"><span>03</span>Safety Activities & Programs</div>
+  <div class="section-label"><span>03</span>Safety Activities &amp; Programs</div>
 
   <div class="grid-2">
     <div class="chart-card">
@@ -757,7 +763,7 @@
           <div class="legend-item"><div class="legend-dot" style="background:#1565c0"></div>Actual</div>
         </div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-campaign"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-campaign" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" height="0" width="0"></canvas></div>
     </div>
 
     <div class="chart-card">
@@ -802,15 +808,15 @@
 </div>
 
 <!-- ══════════════ PAGE 4: AUDIT ══════════════ -->
-<div class="page" id="page-3">
-  <div class="section-label"><span>04</span>Audit & Compliance</div>
+<div class="page active" id="page-3">
+  <div class="section-label"><span>04</span>Audit &amp; Compliance</div>
 
   <div class="grid-2">
     <div class="chart-card" style="grid-column: 1 / -1;">
       <div class="chart-header">
         <div>
           <div class="chart-title">External Body Audit Score</div>
-          <div class="chart-subtitle">ISO & Government Compliance Findings</div>
+          <div class="chart-subtitle">ISO &amp; Government Compliance Findings</div>
         </div>
       </div>
 
@@ -818,8 +824,8 @@
         <thead>
           <tr>
             <th>Audit Type</th>
-            <th style="text-align:center;">Major</th>
-            <th style="text-align:center;">Minor</th>
+            <th style="text-align:center;color:var(--red);">Major</th>
+            <th style="text-align:center;color:var(--amber);">Minor</th>
             <th style="text-align:center;">OFI</th>
             <th>Status</th>
           </tr>
@@ -833,7 +839,7 @@
             <td><span class="status-badge passed" id="aud-14001-status">✓ Passed</span></td>
           </tr>
           <tr>
-            <td>ISO 45001 (Occupational H&S)</td>
+            <td>ISO 45001 (Occupational H&amp;S)</td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-45001-major">0</span></td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-45001-minor">0</span></td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-45001-ofi">0</span></td>
@@ -862,7 +868,7 @@
 </main>
 
 <footer>
-  EHS KPI Management Dashboard &nbsp;·&nbsp; Safety Key Performance Indicators &nbsp;·&nbsp; <span id="footer-year"></span>
+  EHS KPI Management Dashboard &nbsp;·&nbsp; Safety Key Performance Indicators &nbsp;·&nbsp; <span id="footer-year">2026 EHS Team</span>
 </footer>
 
 <!-- ═══════════════════════════════════════════════
@@ -917,57 +923,57 @@
 
     <!-- Section Tabs -->
     <div class="ep-tabs">
-      <button class="ep-tab active" onclick="switchEpTab(0,this)">S1 Lagging</button>
+      <button class="ep-tab" onclick="switchEpTab(0,this)">S1 Lagging</button>
       <button class="ep-tab" onclick="switchEpTab(1,this)">S2 Leading</button>
       <button class="ep-tab" onclick="switchEpTab(2,this)">S3 Activity</button>
-      <button class="ep-tab" onclick="switchEpTab(3,this)">S4 Audit</button>
+      <button class="ep-tab active" onclick="switchEpTab(3,this)">S4 Audit</button>
     </div>
 
     <!-- ── EP TAB 0: LAGGING ── -->
-    <div class="ep-sub active" id="ep-sub-0">
+    <div class="ep-sub" id="ep-sub-0">
 
       <div class="ep-section">
         <div class="ep-section-title">🔢 KPI 지표 카드</div>
         <div class="ep-grid-2">
           <div class="ep-field">
             <label>Fatal Accident (현재)</label>
-            <input type="number" id="inp-fatal-cur" value="0" min="0">
+            <input type="number" id="inp-fatal-cur" value="0" min="0" data-default="0">
           </div>
           <div class="ep-field">
             <label>Fatal Accident (전년)</label>
-            <input type="number" id="inp-fatal-prev" value="0" min="0">
+            <input type="number" id="inp-fatal-prev" value="0" min="0" data-default="0">
           </div>
           <div class="ep-field">
             <label>Reportable Accident (현재)</label>
-            <input type="number" id="inp-report-cur" value="0" min="0">
+            <input type="number" id="inp-report-cur" value="0" min="0" data-default="0">
           </div>
           <div class="ep-field">
             <label>Reportable Accident (전년)</label>
-            <input type="number" id="inp-report-prev" value="0" min="0">
+            <input type="number" id="inp-report-prev" value="0" min="0" data-default="0">
           </div>
           <div class="ep-field">
             <label>Lost Work-Days (현재)</label>
-            <input type="number" id="inp-lwd-cur" value="0" min="0">
+            <input type="number" id="inp-lwd-cur" value="0" min="0" data-default="0">
           </div>
           <div class="ep-field">
             <label>Lost Work-Days (전년)</label>
-            <input type="number" id="inp-lwd-prev" value="0" min="0">
+            <input type="number" id="inp-lwd-prev" value="0" min="0" data-default="0">
           </div>
           <div class="ep-field">
             <label>Accident Rate (현재)</label>
-            <input type="number" id="inp-rate-cur" value="0" min="0" step="0.01">
+            <input type="number" id="inp-rate-cur" value="0" min="0" step="0.01" data-default="0">
           </div>
           <div class="ep-field">
             <label>Accident Rate (전년)</label>
-            <input type="number" id="inp-rate-prev" value="0" min="0" step="0.01">
+            <input type="number" id="inp-rate-prev" value="0" min="0" step="0.01" data-default="0">
           </div>
           <div class="ep-field">
             <label>Fire Accident (현재)</label>
-            <input type="number" id="inp-fire-cur" value="0" min="0">
+            <input type="number" id="inp-fire-cur" value="0" min="0" data-default="0">
           </div>
           <div class="ep-field">
             <label>Fire Accident (전년)</label>
-            <input type="number" id="inp-fire-prev" value="1" min="0">
+            <input type="number" id="inp-fire-prev" value="1" min="0" data-default="1">
           </div>
         </div>
       </div>
@@ -976,17 +982,17 @@
         <div class="ep-section-title">📊 RBKR Gemba walk (with Management) (분기별)</div>
         <div class="ep-row-label" style="color:#2979ff;">Findings</div>
         <div class="ep-quarter-grid">
-          <div class="ep-mini-field"><label>1Q</label><input type="number" id="insp-f-1" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>2Q</label><input type="number" id="insp-f-2" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>3Q</label><input type="number" id="insp-f-3" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>4Q</label><input type="number" id="insp-f-4" value="0" min="0"></div>
+          <div class="ep-mini-field"><label>1Q</label><input type="number" id="insp-f-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>2Q</label><input type="number" id="insp-f-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>3Q</label><input type="number" id="insp-f-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>4Q</label><input type="number" id="insp-f-4" value="0" min="0" data-default="0"></div>
         </div>
         <div class="ep-row-label" style="color:#00c853; margin-top:8px;">Improvements</div>
         <div class="ep-quarter-grid">
-          <div class="ep-mini-field"><label>1Q</label><input type="number" id="insp-i-1" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>2Q</label><input type="number" id="insp-i-2" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>3Q</label><input type="number" id="insp-i-3" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>4Q</label><input type="number" id="insp-i-4" value="0" min="0"></div>
+          <div class="ep-mini-field"><label>1Q</label><input type="number" id="insp-i-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>2Q</label><input type="number" id="insp-i-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>3Q</label><input type="number" id="insp-i-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>4Q</label><input type="number" id="insp-i-4" value="0" min="0" data-default="0"></div>
         </div>
       </div>
 
@@ -994,33 +1000,33 @@
         <div class="ep-section-title">📈 Gemba walk (with Union) (월별)</div>
         <div class="ep-row-label" style="color:#1565c0;">Buy</div>
         <div class="ep-month-grid">
-          <div class="ep-mini-field"><label>Jan</label><input type="number" id="tr-b-1" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Feb</label><input type="number" id="tr-b-2" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Mar</label><input type="number" id="tr-b-3" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Apr</label><input type="number" id="tr-b-4" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>May</label><input type="number" id="tr-b-5" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Jun</label><input type="number" id="tr-b-6" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Jul</label><input type="number" id="tr-b-7" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Aug</label><input type="number" id="tr-b-8" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Sep</label><input type="number" id="tr-b-9" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Oct</label><input type="number" id="tr-b-10" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Nov</label><input type="number" id="tr-b-11" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Dec</label><input type="number" id="tr-b-12" value="0" min="0"></div>
+          <div class="ep-mini-field"><label>Jan</label><input type="number" id="tr-b-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Feb</label><input type="number" id="tr-b-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Mar</label><input type="number" id="tr-b-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Apr</label><input type="number" id="tr-b-4" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>May</label><input type="number" id="tr-b-5" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jun</label><input type="number" id="tr-b-6" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jul</label><input type="number" id="tr-b-7" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Aug</label><input type="number" id="tr-b-8" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Sep</label><input type="number" id="tr-b-9" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Oct</label><input type="number" id="tr-b-10" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Nov</label><input type="number" id="tr-b-11" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Dec</label><input type="number" id="tr-b-12" value="0" min="0" data-default="0"></div>
         </div>
         <div class="ep-row-label" style="color:#2e7d32; margin-top:8px;">Yo</div>
         <div class="ep-month-grid">
-          <div class="ep-mini-field"><label>Jan</label><input type="number" id="tr-y-1" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Feb</label><input type="number" id="tr-y-2" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Mar</label><input type="number" id="tr-y-3" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Apr</label><input type="number" id="tr-y-4" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>May</label><input type="number" id="tr-y-5" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Jun</label><input type="number" id="tr-y-6" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Jul</label><input type="number" id="tr-y-7" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Aug</label><input type="number" id="tr-y-8" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Sep</label><input type="number" id="tr-y-9" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Oct</label><input type="number" id="tr-y-10" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Nov</label><input type="number" id="tr-y-11" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Dec</label><input type="number" id="tr-y-12" value="0" min="0"></div>
+          <div class="ep-mini-field"><label>Jan</label><input type="number" id="tr-y-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Feb</label><input type="number" id="tr-y-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Mar</label><input type="number" id="tr-y-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Apr</label><input type="number" id="tr-y-4" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>May</label><input type="number" id="tr-y-5" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jun</label><input type="number" id="tr-y-6" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jul</label><input type="number" id="tr-y-7" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Aug</label><input type="number" id="tr-y-8" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Sep</label><input type="number" id="tr-y-9" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Oct</label><input type="number" id="tr-y-10" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Nov</label><input type="number" id="tr-y-11" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Dec</label><input type="number" id="tr-y-12" value="0" min="0" data-default="0"></div>
         </div>
       </div>
     </div>
@@ -1029,75 +1035,75 @@
     <div class="ep-sub" id="ep-sub-1">
 
       <div class="ep-section">
-        <div class="ep-section-title">📉 Near Miss & Safety Observation (월별)</div>
+        <div class="ep-section-title">📉 Near Miss &amp; Safety Observation (월별)</div>
         <div class="ep-row-label" style="color:#ffab00;">Near Miss</div>
         <div class="ep-month-grid">
-          <div class="ep-mini-field"><label>Jan</label><input type="number" id="nm-1" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Feb</label><input type="number" id="nm-2" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Mar</label><input type="number" id="nm-3" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Apr</label><input type="number" id="nm-4" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>May</label><input type="number" id="nm-5" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Jun</label><input type="number" id="nm-6" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Jul</label><input type="number" id="nm-7" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Aug</label><input type="number" id="nm-8" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Sep</label><input type="number" id="nm-9" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Oct</label><input type="number" id="nm-10" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Nov</label><input type="number" id="nm-11" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Dec</label><input type="number" id="nm-12" value="0" min="0"></div>
+          <div class="ep-mini-field"><label>Jan</label><input type="number" id="nm-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Feb</label><input type="number" id="nm-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Mar</label><input type="number" id="nm-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Apr</label><input type="number" id="nm-4" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>May</label><input type="number" id="nm-5" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jun</label><input type="number" id="nm-6" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jul</label><input type="number" id="nm-7" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Aug</label><input type="number" id="nm-8" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Sep</label><input type="number" id="nm-9" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Oct</label><input type="number" id="nm-10" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Nov</label><input type="number" id="nm-11" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Dec</label><input type="number" id="nm-12" value="0" min="0" data-default="0"></div>
         </div>
         <div class="ep-row-label" style="color:#2979ff; margin-top:8px;">Safety Observation</div>
         <div class="ep-month-grid">
-          <div class="ep-mini-field"><label>Jan</label><input type="number" id="so-1" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Feb</label><input type="number" id="so-2" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Mar</label><input type="number" id="so-3" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Apr</label><input type="number" id="so-4" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>May</label><input type="number" id="so-5" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Jun</label><input type="number" id="so-6" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Jul</label><input type="number" id="so-7" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Aug</label><input type="number" id="so-8" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Sep</label><input type="number" id="so-9" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Oct</label><input type="number" id="so-10" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Nov</label><input type="number" id="so-11" value="0" min="0"></div>
-          <div class="ep-mini-field"><label>Dec</label><input type="number" id="so-12" value="0" min="0"></div>
+          <div class="ep-mini-field"><label>Jan</label><input type="number" id="so-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Feb</label><input type="number" id="so-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Mar</label><input type="number" id="so-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Apr</label><input type="number" id="so-4" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>May</label><input type="number" id="so-5" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jun</label><input type="number" id="so-6" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jul</label><input type="number" id="so-7" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Aug</label><input type="number" id="so-8" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Sep</label><input type="number" id="so-9" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Oct</label><input type="number" id="so-10" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Nov</label><input type="number" id="so-11" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Dec</label><input type="number" id="so-12" value="0" min="0" data-default="0"></div>
         </div>
       </div>
 
       <div class="ep-section">
         <div class="ep-section-title">📊 Risk Distribution by Area</div>
-        <p style="font-size:10px; color:var(--text-dim); margin-bottom:12px;">6개 영역 · 2025 vs 2024</p>
+        <p style="font-size:10px; color:var(--text-dim); margin-bottom:12px;">6개 영역 · 2026 vs 2025</p>
         <div style="display:grid; grid-template-columns: 1fr; gap:8px;">
           <div style="font-size:10px; font-weight:700; color:var(--text-secondary); display:grid; grid-template-columns:1fr 60px 60px; gap:6px; text-transform:uppercase; letter-spacing:0.5px;">
-            <span>Area</span><span style="text-align:center;color:#1565c0">2025</span><span style="text-align:center;color:rgba(21,101,192,0.5)">2024</span>
+            <span>Area</span><span style="text-align:center;color:#1565c0">2026</span><span style="text-align:center;color:rgba(21,101,192,0.5)">2025</span>
           </div>
           <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
             <span style="font-size:10px; color:var(--text-secondary)">Dept. specific</span>
-            <input type="number" id="risk-25-0" value="17" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
-            <input type="number" id="risk-24-0" value="19" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
+            <input type="number" id="risk-25-0" value="17" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="17">
+            <input type="number" id="risk-24-0" value="19" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="19">
           </div>
           <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
             <span style="font-size:10px; color:var(--text-secondary)">Maintenance</span>
-            <input type="number" id="risk-25-1" value="9" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
-            <input type="number" id="risk-24-1" value="9" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
+            <input type="number" id="risk-25-1" value="9" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="9">
+            <input type="number" id="risk-24-1" value="9" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="9">
           </div>
           <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
             <span style="font-size:10px; color:var(--text-secondary)">Machine Tools</span>
-            <input type="number" id="risk-25-2" value="23" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
-            <input type="number" id="risk-24-2" value="25" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
+            <input type="number" id="risk-25-2" value="23" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="23">
+            <input type="number" id="risk-24-2" value="25" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="25">
           </div>
           <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
             <span style="font-size:10px; color:var(--text-secondary)">Facility Mgmt</span>
-            <input type="number" id="risk-25-3" value="26" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
-            <input type="number" id="risk-24-3" value="26" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
+            <input type="number" id="risk-25-3" value="26" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="26">
+            <input type="number" id="risk-24-3" value="26" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="26">
           </div>
           <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
             <span style="font-size:10px; color:var(--text-secondary)">Storage room</span>
-            <input type="number" id="risk-25-4" value="1" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
-            <input type="number" id="risk-24-4" value="1" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
+            <input type="number" id="risk-25-4" value="1" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="1">
+            <input type="number" id="risk-24-4" value="1" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="1">
           </div>
           <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
             <span style="font-size:10px; color:var(--text-secondary)">Test bench</span>
-            <input type="number" id="risk-25-5" value="6" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
-            <input type="number" id="risk-24-5" value="6" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
+            <input type="number" id="risk-25-5" value="6" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="6">
+            <input type="number" id="risk-24-5" value="6" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="6">
           </div>
         </div>
       </div>
@@ -1114,23 +1120,23 @@
           </div>
           <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
             <span style="font-size:10px; color:var(--text-secondary)">Homefit</span>
-            <input type="number" id="camp-p-0" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
-            <input type="number" id="camp-a-0" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
+            <input type="number" id="camp-p-0" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+            <input type="number" id="camp-a-0" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
           </div>
           <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
             <span style="font-size:10px; color:var(--text-secondary)">Smombie</span>
-            <input type="number" id="camp-p-1" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
-            <input type="number" id="camp-a-1" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
+            <input type="number" id="camp-p-1" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+            <input type="number" id="camp-a-1" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
           </div>
           <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
             <span style="font-size:10px; color:var(--text-secondary)">STOP campaign</span>
-            <input type="number" id="camp-p-2" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
-            <input type="number" id="camp-a-2" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
+            <input type="number" id="camp-p-2" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+            <input type="number" id="camp-a-2" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
           </div>
           <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
             <span style="font-size:10px; color:var(--text-secondary)">Safety Hero Award</span>
-            <input type="number" id="camp-p-3" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
-            <input type="number" id="camp-a-3" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;">
+            <input type="number" id="camp-p-3" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+            <input type="number" id="camp-a-3" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
           </div>
         </div>
       </div>
@@ -1140,22 +1146,22 @@
         <div class="ep-grid-3">
           <div class="ep-field">
             <label>🔥 Fire Drill</label>
-            <input type="number" id="drill-fire-val" value="0" min="0" max="100">
+            <input type="number" id="drill-fire-val" value="0" min="0" max="100" data-default="0">
           </div>
           <div class="ep-field">
             <label>🚨 SAPA Drill</label>
-            <input type="number" id="drill-sapa-val" value="0" min="0" max="100">
+            <input type="number" id="drill-sapa-val" value="0" min="0" max="100" data-default="0">
           </div>
           <div class="ep-field">
             <label>🩺 First Aid</label>
-            <input type="number" id="drill-aid-val" value="0" min="0" max="100">
+            <input type="number" id="drill-aid-val" value="0" min="0" max="100" data-default="0">
           </div>
         </div>
       </div>
     </div>
 
     <!-- ── EP TAB 3: AUDIT ── -->
-    <div class="ep-sub" id="ep-sub-3">
+    <div class="ep-sub active" id="ep-sub-3">
 
       <div class="ep-section">
         <div class="ep-section-title">🔍 Audit Findings</div>
@@ -1164,36 +1170,36 @@
         <div style="margin-bottom:16px;">
           <div class="ep-row-label">ISO 14001 (Environmental)</div>
           <div class="ep-grid-3">
-            <div class="ep-field"><label>Major</label><input type="number" id="aud-14001-major-inp" value="0" min="0"></div>
-            <div class="ep-field"><label>Minor</label><input type="number" id="aud-14001-minor-inp" value="0" min="0"></div>
-            <div class="ep-field"><label>OFI</label><input type="number" id="aud-14001-ofi-inp" value="0" min="0"></div>
+            <div class="ep-field"><label>Major</label><input type="number" id="aud-14001-major-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>Minor</label><input type="number" id="aud-14001-minor-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>OFI</label><input type="number" id="aud-14001-ofi-inp" value="0" min="0" data-default="0"></div>
           </div>
         </div>
 
         <div style="margin-bottom:16px;">
-          <div class="ep-row-label">ISO 45001 (Occupational H&S)</div>
+          <div class="ep-row-label">ISO 45001 (Occupational H&amp;S)</div>
           <div class="ep-grid-3">
-            <div class="ep-field"><label>Major</label><input type="number" id="aud-45001-major-inp" value="0" min="0"></div>
-            <div class="ep-field"><label>Minor</label><input type="number" id="aud-45001-minor-inp" value="0" min="0"></div>
-            <div class="ep-field"><label>OFI</label><input type="number" id="aud-45001-ofi-inp" value="0" min="0"></div>
+            <div class="ep-field"><label>Major</label><input type="number" id="aud-45001-major-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>Minor</label><input type="number" id="aud-45001-minor-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>OFI</label><input type="number" id="aud-45001-ofi-inp" value="0" min="0" data-default="0"></div>
           </div>
         </div>
 
         <div style="margin-bottom:16px;">
           <div class="ep-row-label">Government</div>
           <div class="ep-grid-3">
-            <div class="ep-field"><label>Major</label><input type="number" id="aud-gov-major-inp" value="0" min="0"></div>
-            <div class="ep-field"><label>Minor</label><input type="number" id="aud-gov-minor-inp" value="0" min="0"></div>
-            <div class="ep-field"><label>OFI</label><input type="number" id="aud-gov-ofi-inp" value="0" min="0"></div>
+            <div class="ep-field"><label>Major</label><input type="number" id="aud-gov-major-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>Minor</label><input type="number" id="aud-gov-minor-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>OFI</label><input type="number" id="aud-gov-ofi-inp" value="0" min="0" data-default="0"></div>
           </div>
         </div>
 
         <div>
           <div class="ep-row-label">Compliance Audit</div>
           <div class="ep-grid-3">
-            <div class="ep-field"><label>Major</label><input type="number" id="aud-comp-major-inp" value="0" min="0"></div>
-            <div class="ep-field"><label>Minor</label><input type="number" id="aud-comp-minor-inp" value="0" min="0"></div>
-            <div class="ep-field"><label>OFI</label><input type="number" id="aud-comp-ofi-inp" value="0" min="0"></div>
+            <div class="ep-field"><label>Major</label><input type="number" id="aud-comp-major-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>Minor</label><input type="number" id="aud-comp-minor-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>OFI</label><input type="number" id="aud-comp-ofi-inp" value="0" min="0" data-default="0"></div>
           </div>
         </div>
       </div>
@@ -1264,8 +1270,8 @@ const chartNearmiss = makeChart('chart-nearmiss', 'line', MONTHS, [
 
 const riskLabels = ['Dept. specific process','Maintenance','Machine Tools','Facility management','Storage room','Test bench'];
 const chartRisk = makeChart('chart-risk', 'bar', riskLabels, [
-  { label: '2025', data: [17,9,23,26,1,6], backgroundColor: 'rgba(21,101,192,0.7)', borderColor: '#1565c0', borderWidth: 1, borderRadius: 3 },
-  { label: '2024', data: [19,9,25,26,1,6], backgroundColor: 'rgba(21,101,192,0.2)', borderColor: 'rgba(21,101,192,0.4)', borderWidth: 1, borderRadius: 3 }
+  { label: '2026', data: [17,9,23,26,1,6], backgroundColor: 'rgba(21,101,192,0.7)', borderColor: '#1565c0', borderWidth: 1, borderRadius: 3 },
+  { label: '2025', data: [19,9,25,26,1,6], backgroundColor: 'rgba(21,101,192,0.2)', borderColor: 'rgba(21,101,192,0.4)', borderWidth: 1, borderRadius: 3 }
 ], {
   indexAxis: 'y',
   scales: {
@@ -1378,28 +1384,39 @@ function applyValues(silent = false) {
       const val = getVal('aud-' + row.id + '-' + type + '-inp');
       const el = document.getElementById('aud-' + row.id + '-' + type);
       el.textContent = val;
-      el.className = 'finding-num' + (val === 0 ? ' zero' : '');
+      if (val === 0) {
+        el.className = 'finding-num zero';
+      } else if (type === 'major') {
+        el.className = 'finding-num major';
+      } else if (type === 'minor') {
+        el.className = 'finding-num minor';
+      } else {
+        el.className = 'finding-num'; // OFI: 색상 변경 없음
+      }
     });
     const major = getVal('aud-' + row.id + '-major-inp');
     const minor = getVal('aud-' + row.id + '-minor-inp');
     const ofi   = getVal('aud-' + row.id + '-ofi-inp');
     const statusEl = document.getElementById(row.statusEl);
-    if (major === 0 && minor === 0 && ofi === 0) {
-      statusEl.className = 'status-badge ' + (row.id === 'gov' ? 'no-findings' : 'passed');
-      statusEl.textContent = row.id === 'gov' ? '— No Findings' : '✓ Passed';
-      statusEl.style.cssText = '';
-    } else if (major > 0) {
+    if (major > 0) {
+      // Major 있음 → 빨간색
       statusEl.className = 'status-badge';
       statusEl.style.background = 'var(--red-dim)';
       statusEl.style.color = 'var(--red)';
       statusEl.style.border = '1px solid rgba(229,57,53,0.3)';
       statusEl.textContent = '✗ Major Finding';
-    } else {
+    } else if (minor > 0) {
+      // Minor 있음 (Major 없음) → 노란색
       statusEl.className = 'status-badge';
       statusEl.style.background = 'var(--amber-dim)';
       statusEl.style.color = 'var(--amber)';
       statusEl.style.border = '1px solid rgba(245,158,11,0.3)';
-      statusEl.textContent = '⚠ Minor/OFI';
+      statusEl.textContent = '⚠ Minor Finding';
+    } else {
+      // OFI만 있거나 모두 0 → Passed
+      statusEl.className = 'status-badge ' + (row.id === 'gov' ? 'no-findings' : 'passed');
+      statusEl.textContent = row.id === 'gov' ? '— No Findings' : '✓ Passed';
+      statusEl.style.cssText = '';
     }
   });
 
@@ -1600,5 +1617,6 @@ document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
   }
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>
