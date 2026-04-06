@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EHS KPI Management Dashboard</title>
+<link href="hse_kpi_dashboard_files/css2.css" rel="stylesheet">
+<script src="hse_kpi_dashboard_files/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --surface2: #f0f2f5;
+    --border: #dde1e7;
+    --green: #00a846;
+    --green-dim: #e6f7ee;
+    --red: #e53935;
+    --red-dim: #fdecea;
+    --amber: #f59e0b;
+    --amber-dim: #fff8e6;
+    --blue: #1565c0;
+    --blue-dim: #e8f0fb;
+    --text-primary: #1a1f2e;
+    --text-secondary: #5a6478;
+    --text-dim: #9aa0ad;
+    --accent: #1565c0;
+    --accent2: #2e7d32;
+    --header-h: 72px;
+    --tab-h: 48px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  header {
+    position: sticky; top: 0; z-index: 100;
+    height: var(--header-h);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 32px;
+    gap: 20px;
+  }
+
+  .bosch-logo-img {
+    height: 36px;
+    width: auto;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 32px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .header-titles { flex: 1; }
+  .header-titles h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .header-titles p {
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .header-meta {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .update-badge {
+    font-size: 11px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Edit Mode Toggle Button in Header */
+  .edit-toggle-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .edit-toggle-btn:hover { border-color: var(--amber); color: var(--amber); }
+  .edit-toggle-btn.active { background: var(--amber); border-color: var(--amber); color: #000; }
+
+  .tab-bar {
+    position: sticky; top: var(--header-h); z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0 32px;
+  }
+
+  .tab-btn {
+    height: var(--tab-h);
+    padding: 0 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  main { padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
+
+  .page { display: none; animation: fadeIn 0.3s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .section-label span { color: var(--accent); margin-right: 8px; }
+
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 16px 14px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.red::before { background: var(--red); }
+  .stat-card.amber::before { background: var(--amber); }
+  .stat-card.blue::before { background: var(--blue); }
+  .stat-card.neutral::before { background: var(--text-dim); }
+
+  .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 10px; }
+  .stat-value-row { display: flex; align-items: baseline; gap: 6px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: 1; color: var(--green); }
+  .stat-value.danger { color: var(--red); }
+  .stat-value.neutral { color: var(--text-primary); }
+  .stat-prev { font-size: 11px; color: var(--text-dim); font-weight: 500; }
+  .stat-status { margin-top: 8px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .stat-status.ok { color: var(--green); }
+  .stat-status.warn { color: var(--red); }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .chart-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-primary); }
+  .chart-subtitle { font-size: 10px; color: var(--text-secondary); margin-top: 3px; }
+  .chart-legend { display: flex; gap: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-secondary); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .chart-wrap { position: relative; height: 200px; }
+
+  .drill-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .drill-item { margin-bottom: 18px; }
+  .drill-item:last-child { margin-bottom: 0; }
+  .drill-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .drill-name { font-size: 11px; font-weight: 600; color: var(--text-primary); letter-spacing: 0.5px; }
+  .drill-pct { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--blue); }
+  .drill-bar-bg { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
+  .drill-bar { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #1565c0, #42a5f5); transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+
+  .audit-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .audit-table th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-secondary); padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .audit-table td { padding: 11px 12px; border-bottom: 1px solid rgba(221,225,231,0.8); color: var(--text-primary); vertical-align: middle; }
+  .audit-table tr:last-child td { border-bottom: none; }
+  .audit-table tr:hover td { background: var(--surface2); }
+
+  .status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
+  .status-badge.passed { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,200,83,0.3); }
+  .status-badge.no-findings { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(41,121,255,0.3); }
+
+  .finding-num { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--text-primary); }
+  .finding-num.zero  { color: var(--green); }
+  .finding-num.minor { color: var(--amber); }
+  .finding-num.major { color: var(--red); }
+
+  footer { text-align: center; padding: 24px; font-size: 11px; color: var(--text-dim); border-top: 1px solid var(--border); margin-top: 40px; }
+
+  @media (max-width: 1100px) { .grid-5 { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 768px) { main { padding: 16px; } .grid-5 { grid-template-columns: 1fr 1fr; } .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* ═══════════════════════════════════════════════
+     EDIT PANEL STYLES
+  ═══════════════════════════════════════════════ */
+  .edit-panel-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,15,30,0.45);
+    z-index: 500;
+    backdrop-filter: blur(4px);
+    animation: overlayIn 0.2s ease;
+  }
+  .edit-panel-overlay.open { display: block; }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .edit-panel {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 420px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 501;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: -8px 0 40px rgba(0,0,0,0.1);
+  }
+  .edit-panel.open { transform: translateX(0); }
+
+  .ep-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .ep-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    flex: 1;
+  }
+  .ep-close {
+    width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+  }
+  .ep-close:hover { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+
+  .ep-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+  .ep-body::-webkit-scrollbar { width: 4px; }
+  .ep-body::-webkit-scrollbar-track { background: transparent; }
+  .ep-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .ep-section {
+    margin-bottom: 28px;
+  }
+  .ep-section-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--surface2);
+    margin-bottom: 14px;
+  }
+
+  .ep-field {
+    margin-bottom: 12px;
+  }
+  .ep-field label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+  .ep-field input[type="number"],
+  .ep-field input[type="text"],
+  .ep-field select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--surface);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .ep-field input:focus, .ep-field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.08);
+  }
+
+  .ep-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ep-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+  .ep-row-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .ep-month-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .ep-month-grid .ep-mini-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .ep-month-grid .ep-mini-field label {
+    font-size: 9px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .ep-month-grid .ep-mini-field input {
+    width: 100%;
+    padding: 5px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: 'Bebas Neue', sans-serif;
+    color: var(--text-primary);
+    background: var(--surface);
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .ep-month-grid .ep-mini-field input:focus { border-color: var(--accent); }
+
+  .ep-quarter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .ep-quarter-grid .ep-mini-field {
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .ep-quarter-grid .ep-mini-field label {
+    font-size: 9px; color: var(--text-dim); text-align: center; text-transform: uppercase;
+  }
+  .ep-quarter-grid .ep-mini-field input {
+    width: 100%; padding: 5px 6px; border: 1px solid var(--border);
+    border-radius: 4px; font-size: 11px; font-family: 'Bebas Neue', sans-serif;
+    color: var(--text-primary); background: var(--surface); text-align: center;
+    outline: none; transition: border-color 0.2s;
+  }
+  .ep-quarter-grid .ep-mini-field input:focus { border-color: var(--accent); }
+
+  .ep-divider { height: 1px; background: var(--surface2); margin: 6px 0 14px; }
+
+  .ep-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .ep-apply-btn {
+    flex: 1;
+    padding: 10px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .ep-apply-btn:hover { background: #1a73e8; }
+  .ep-reset-btn {
+    padding: 10px 18px;
+    background: none;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .ep-reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Chart nav tabs inside panel */
+  .ep-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 4px;
+  }
+  .ep-tab {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .ep-tab.active { background: var(--surface); color: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  .ep-sub { display: none; }
+  .ep-sub.active { display: block; }
+
+  /* Edit mode active indicator on chart cards */
+  body.edit-mode .chart-card { border-color: rgba(245,158,11,0.4); }
+  body.edit-mode .stat-card { border-color: rgba(245,158,11,0.3); }
+
+  /* ── PASSWORD MODAL ────────────────────────────── */
+  .pw-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,15,30,0.55);
+    z-index: 600;
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+  }
+  .pw-overlay.open { display: flex; animation: overlayIn 0.2s ease; }
+
+  .pw-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 32px 28px;
+    width: 320px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    text-align: center;
+    animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.88) translateY(12px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .pw-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+  .pw-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .pw-subtitle {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    letter-spacing: 0.3px;
+  }
+
+  .pw-dots {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .pw-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: transparent;
+    transition: all 0.2s;
+  }
+  .pw-dot.filled {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px rgba(21,101,192,0.4);
+  }
+  .pw-dot.error {
+    background: var(--red);
+    border-color: var(--red);
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%     { transform: translateX(-5px); }
+    40%     { transform: translateX(5px); }
+    60%     { transform: translateX(-4px); }
+    80%     { transform: translateX(4px); }
+  }
+
+  .pw-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .pw-key {
+    height: 52px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.12s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pw-key:hover { background: var(--blue-dim); border-color: var(--accent); color: var(--accent); }
+  .pw-key:active { transform: scale(0.93); }
+  .pw-key.zero { grid-column: 2; }
+  .pw-key.del  { background: var(--surface2); font-size: 16px; color: var(--text-secondary); }
+  .pw-key.del:hover { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+
+  .pw-error-msg {
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    height: 16px;
+    margin-bottom: 4px;
+    transition: opacity 0.2s;
+  }
+  .pw-cancel {
+    margin-top: 10px;
+    background: none;
+    border: none;
+    font-size: 11px;
+    color: var(--text-dim);
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .pw-cancel:hover { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <img class="bosch-logo-img" src="data:image/png;base64,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" alt="BOSCH">
+  <div class="header-divider"></div>
+  <div class="header-titles">
+    <h1>EHS KPI MANAGEMENT</h1>
+    <p>Safety Key Performance Indicators</p>
+  </div>
+  <div class="header-meta">
+    <span class="update-badge" id="asof-date">As of Apr. 2026</span>
+    <div class="live-dot"></div>
+    <button class="edit-toggle-btn" id="editToggleBtn" onclick="toggleEditPanel()">
+      ✏️ 값 편집
+    </button>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <button class="tab-btn" onclick="switchTab(0, this)">Section 1 — Lagging</button>
+  <button class="tab-btn" onclick="switchTab(1, this)">Section 2 — Leading</button>
+  <button class="tab-btn" onclick="switchTab(2, this)">Section 3 — Activities</button>
+  <button class="tab-btn active" onclick="switchTab(3, this)">Section 4 — Audit</button>
+</div>
+
+<main>
+
+<!-- ══════════════ PAGE 1: LAGGING ══════════════ -->
+<div class="page" id="page-0">
+  <div class="section-label"><span>01</span>Safety Lagging Indicators &nbsp;·&nbsp; *2026 (2025)</div>
+
+  <div class="grid-5" style="margin-bottom:24px;">
+    <div class="stat-card green">
+      <div class="stat-label">Fatal Accident</div>
+      <div class="stat-value-row">
+        <div class="stat-value" id="v-fatal">0</div>
+        <div class="stat-prev" id="p-fatal">(0)</div>
+      </div>
+      <div class="stat-status ok" id="s-fatal">● CLEAR</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Reportable Accident</div>
+      <div class="stat-value-row">
+        <div class="stat-value" id="v-report">0</div>
+        <div class="stat-prev" id="p-report">(0)</div>
+      </div>
+      <div class="stat-status ok" id="s-report">● CLEAR</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Lost of Work-Days</div>
+      <div class="stat-value-row">
+        <div class="stat-value" id="v-lwd">0</div>
+        <div class="stat-prev" id="p-lwd">(0)</div>
+      </div>
+      <div class="stat-status ok" id="s-lwd">● CLEAR</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Accident Rate</div>
+      <div class="stat-value-row">
+        <div class="stat-value" id="v-rate">0</div>
+        <div class="stat-prev" id="p-rate">(0)</div>
+      </div>
+      <div class="stat-status ok" id="s-rate">● ON TARGET</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Fire Accident</div>
+      <div class="stat-value-row">
+        <div class="stat-value" id="v-fire">0</div>
+        <div class="stat-prev" id="p-fire">(1)</div>
+      </div>
+      <div class="stat-status ok" id="s-fire">● IMPROVED</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">RBKR Gemba walk (with Management)</div>
+          <div class="chart-subtitle">Findings &amp; Improvements · Quarterly</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#2979ff"></div>Findings</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#00c853"></div>Improvements</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-inspection" style="display: block; box-sizing: border-box; height: 200px; width: 719px;" width="719" height="200"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Gemba walk (with Union)</div>
+          <div class="chart-subtitle">Monthly · Buy vs Yo</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#00e5ff"></div>Buy</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#76ff03"></div>Yo</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-training" style="display: block; box-sizing: border-box; height: 200px; width: 719px;" width="719" height="200"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE 2: LEADING ══════════════ -->
+<div class="page" id="page-1">
+  <div class="section-label"><span>02</span>Safety Leading Indicators</div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Near Miss &amp; Safety Observation</div>
+          <div class="chart-subtitle">Monthly Trend</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#ffab00"></div>Near Miss</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#2979ff"></div>Safety Obs.</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-nearmiss" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" height="0" width="0"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Risk Distribution by Area</div>
+          <div class="chart-subtitle">2026 vs 2025 · Horizontal Bar</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1565c0"></div>2026</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(21,101,192,0.25)"></div>2025</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:240px;"><canvas id="chart-risk" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" height="0" width="0"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE 3: ACTIVITIES ══════════════ -->
+<div class="page" id="page-2">
+  <div class="section-label"><span>03</span>Safety Activities &amp; Programs</div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Safety Campaign Progress</div>
+          <div class="chart-subtitle">Plan vs Actual</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#b4bec8"></div>Plan</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1565c0"></div>Actual</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-campaign" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" height="0" width="0"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Emergency Response Drill Status</div>
+          <div class="chart-subtitle">Completion Rate by Type</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="drill-item">
+          <div class="drill-row">
+            <span class="drill-name">🔥 Fire Drill</span>
+            <span class="drill-pct" id="drill-fire">0%</span>
+          </div>
+          <div class="drill-bar-bg">
+            <div class="drill-bar" id="bar-fire" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="drill-item">
+          <div class="drill-row">
+            <span class="drill-name">🚨 SAPA Drill</span>
+            <span class="drill-pct" id="drill-sapa">0%</span>
+          </div>
+          <div class="drill-bar-bg">
+            <div class="drill-bar" id="bar-sapa" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="drill-item">
+          <div class="drill-row">
+            <span class="drill-name">🩺 First Aid</span>
+            <span class="drill-pct" id="drill-aid">0%</span>
+          </div>
+          <div class="drill-bar-bg">
+            <div class="drill-bar" id="bar-aid" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE 4: AUDIT ══════════════ -->
+<div class="page active" id="page-3">
+  <div class="section-label"><span>04</span>Audit &amp; Compliance</div>
+
+  <div class="grid-2">
+    <div class="chart-card" style="grid-column: 1 / -1;">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">External Body Audit Score</div>
+          <div class="chart-subtitle">ISO &amp; Government Compliance Findings</div>
+        </div>
+      </div>
+
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Audit Type</th>
+            <th style="text-align:center;color:var(--red);">Major</th>
+            <th style="text-align:center;color:var(--amber);">Minor</th>
+            <th style="text-align:center;">OFI</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ISO 14001 (Environmental)</td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-14001-major">0</span></td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-14001-minor">0</span></td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-14001-ofi">0</span></td>
+            <td><span class="status-badge passed" id="aud-14001-status">✓ Passed</span></td>
+          </tr>
+          <tr>
+            <td>ISO 45001 (Occupational H&amp;S)</td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-45001-major">0</span></td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-45001-minor">0</span></td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-45001-ofi">0</span></td>
+            <td><span class="status-badge passed" id="aud-45001-status">✓ Passed</span></td>
+          </tr>
+          <tr>
+            <td>Government (District Office, Env. Check)</td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-gov-major">0</span></td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-gov-minor">0</span></td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-gov-ofi">0</span></td>
+            <td><span class="status-badge no-findings" id="aud-gov-status">— No Findings</span></td>
+          </tr>
+          <tr>
+            <td>Compliance Audit</td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-comp-major">0</span></td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-comp-minor">0</span></td>
+            <td style="text-align:center;"><span class="finding-num zero" id="aud-comp-ofi">0</span></td>
+            <td><span class="status-badge passed" id="aud-comp-status">✓ Passed</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  EHS KPI Management Dashboard &nbsp;·&nbsp; Safety Key Performance Indicators &nbsp;·&nbsp; <span id="footer-year">2026 EHS Team</span>
+</footer>
+
+<!-- ═══════════════════════════════════════════════
+     PASSWORD MODAL
+═══════════════════════════════════════════════ -->
+<div class="pw-overlay" id="pwOverlay">
+  <div class="pw-modal">
+    <div class="pw-icon">🔒</div>
+    <div class="pw-title">비밀번호 입력</div>
+    <div class="pw-subtitle">값 편집 모드에 접근하려면 비밀번호를 입력하세요</div>
+
+    <div class="pw-dots">
+      <div class="pw-dot" id="dot-0"></div>
+      <div class="pw-dot" id="dot-1"></div>
+      <div class="pw-dot" id="dot-2"></div>
+      <div class="pw-dot" id="dot-3"></div>
+    </div>
+
+    <div class="pw-error-msg" id="pw-error"></div>
+
+    <div class="pw-keypad">
+      <button class="pw-key" onclick="pwInput('1')">1</button>
+      <button class="pw-key" onclick="pwInput('2')">2</button>
+      <button class="pw-key" onclick="pwInput('3')">3</button>
+      <button class="pw-key" onclick="pwInput('4')">4</button>
+      <button class="pw-key" onclick="pwInput('5')">5</button>
+      <button class="pw-key" onclick="pwInput('6')">6</button>
+      <button class="pw-key" onclick="pwInput('7')">7</button>
+      <button class="pw-key" onclick="pwInput('8')">8</button>
+      <button class="pw-key" onclick="pwInput('9')">9</button>
+      <button class="pw-key zero" onclick="pwInput('0')">0</button>
+      <button class="pw-key del" onclick="pwDelete()">⌫</button>
+    </div>
+
+    <button class="pw-cancel" onclick="closePwModal()">취소</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     EDIT PANEL
+═══════════════════════════════════════════════ -->
+<div class="edit-panel-overlay" id="editOverlay" onclick="closeEditPanel()"></div>
+
+<div class="edit-panel" id="editPanel">
+  <div class="ep-header">
+    <h2>📊 값 편집</h2>
+    <span style="font-size:10px; color:var(--text-dim); letter-spacing:1px;">EDIT VALUES</span>
+    <button class="ep-close" onclick="closeEditPanel()">✕</button>
+  </div>
+
+  <div class="ep-body">
+
+    <!-- Section Tabs -->
+    <div class="ep-tabs">
+      <button class="ep-tab" onclick="switchEpTab(0,this)">S1 Lagging</button>
+      <button class="ep-tab" onclick="switchEpTab(1,this)">S2 Leading</button>
+      <button class="ep-tab" onclick="switchEpTab(2,this)">S3 Activity</button>
+      <button class="ep-tab active" onclick="switchEpTab(3,this)">S4 Audit</button>
+    </div>
+
+    <!-- ── EP TAB 0: LAGGING ── -->
+    <div class="ep-sub" id="ep-sub-0">
+
+      <div class="ep-section">
+        <div class="ep-section-title">🔢 KPI 지표 카드</div>
+        <div class="ep-grid-2">
+          <div class="ep-field">
+            <label>Fatal Accident (현재)</label>
+            <input type="number" id="inp-fatal-cur" value="0" min="0" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>Fatal Accident (전년)</label>
+            <input type="number" id="inp-fatal-prev" value="0" min="0" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>Reportable Accident (현재)</label>
+            <input type="number" id="inp-report-cur" value="0" min="0" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>Reportable Accident (전년)</label>
+            <input type="number" id="inp-report-prev" value="0" min="0" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>Lost Work-Days (현재)</label>
+            <input type="number" id="inp-lwd-cur" value="0" min="0" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>Lost Work-Days (전년)</label>
+            <input type="number" id="inp-lwd-prev" value="0" min="0" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>Accident Rate (현재)</label>
+            <input type="number" id="inp-rate-cur" value="0" min="0" step="0.01" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>Accident Rate (전년)</label>
+            <input type="number" id="inp-rate-prev" value="0" min="0" step="0.01" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>Fire Accident (현재)</label>
+            <input type="number" id="inp-fire-cur" value="0" min="0" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>Fire Accident (전년)</label>
+            <input type="number" id="inp-fire-prev" value="1" min="0" data-default="1">
+          </div>
+        </div>
+      </div>
+
+      <div class="ep-section">
+        <div class="ep-section-title">📊 RBKR Gemba walk (with Management) (분기별)</div>
+        <div class="ep-row-label" style="color:#2979ff;">Findings</div>
+        <div class="ep-quarter-grid">
+          <div class="ep-mini-field"><label>1Q</label><input type="number" id="insp-f-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>2Q</label><input type="number" id="insp-f-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>3Q</label><input type="number" id="insp-f-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>4Q</label><input type="number" id="insp-f-4" value="0" min="0" data-default="0"></div>
+        </div>
+        <div class="ep-row-label" style="color:#00c853; margin-top:8px;">Improvements</div>
+        <div class="ep-quarter-grid">
+          <div class="ep-mini-field"><label>1Q</label><input type="number" id="insp-i-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>2Q</label><input type="number" id="insp-i-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>3Q</label><input type="number" id="insp-i-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>4Q</label><input type="number" id="insp-i-4" value="0" min="0" data-default="0"></div>
+        </div>
+      </div>
+
+      <div class="ep-section">
+        <div class="ep-section-title">📈 Gemba walk (with Union) (월별)</div>
+        <div class="ep-row-label" style="color:#1565c0;">Buy</div>
+        <div class="ep-month-grid">
+          <div class="ep-mini-field"><label>Jan</label><input type="number" id="tr-b-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Feb</label><input type="number" id="tr-b-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Mar</label><input type="number" id="tr-b-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Apr</label><input type="number" id="tr-b-4" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>May</label><input type="number" id="tr-b-5" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jun</label><input type="number" id="tr-b-6" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jul</label><input type="number" id="tr-b-7" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Aug</label><input type="number" id="tr-b-8" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Sep</label><input type="number" id="tr-b-9" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Oct</label><input type="number" id="tr-b-10" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Nov</label><input type="number" id="tr-b-11" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Dec</label><input type="number" id="tr-b-12" value="0" min="0" data-default="0"></div>
+        </div>
+        <div class="ep-row-label" style="color:#2e7d32; margin-top:8px;">Yo</div>
+        <div class="ep-month-grid">
+          <div class="ep-mini-field"><label>Jan</label><input type="number" id="tr-y-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Feb</label><input type="number" id="tr-y-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Mar</label><input type="number" id="tr-y-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Apr</label><input type="number" id="tr-y-4" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>May</label><input type="number" id="tr-y-5" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jun</label><input type="number" id="tr-y-6" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jul</label><input type="number" id="tr-y-7" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Aug</label><input type="number" id="tr-y-8" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Sep</label><input type="number" id="tr-y-9" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Oct</label><input type="number" id="tr-y-10" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Nov</label><input type="number" id="tr-y-11" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Dec</label><input type="number" id="tr-y-12" value="0" min="0" data-default="0"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EP TAB 1: LEADING ── -->
+    <div class="ep-sub" id="ep-sub-1">
+
+      <div class="ep-section">
+        <div class="ep-section-title">📉 Near Miss &amp; Safety Observation (월별)</div>
+        <div class="ep-row-label" style="color:#ffab00;">Near Miss</div>
+        <div class="ep-month-grid">
+          <div class="ep-mini-field"><label>Jan</label><input type="number" id="nm-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Feb</label><input type="number" id="nm-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Mar</label><input type="number" id="nm-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Apr</label><input type="number" id="nm-4" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>May</label><input type="number" id="nm-5" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jun</label><input type="number" id="nm-6" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jul</label><input type="number" id="nm-7" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Aug</label><input type="number" id="nm-8" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Sep</label><input type="number" id="nm-9" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Oct</label><input type="number" id="nm-10" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Nov</label><input type="number" id="nm-11" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Dec</label><input type="number" id="nm-12" value="0" min="0" data-default="0"></div>
+        </div>
+        <div class="ep-row-label" style="color:#2979ff; margin-top:8px;">Safety Observation</div>
+        <div class="ep-month-grid">
+          <div class="ep-mini-field"><label>Jan</label><input type="number" id="so-1" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Feb</label><input type="number" id="so-2" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Mar</label><input type="number" id="so-3" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Apr</label><input type="number" id="so-4" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>May</label><input type="number" id="so-5" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jun</label><input type="number" id="so-6" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Jul</label><input type="number" id="so-7" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Aug</label><input type="number" id="so-8" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Sep</label><input type="number" id="so-9" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Oct</label><input type="number" id="so-10" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Nov</label><input type="number" id="so-11" value="0" min="0" data-default="0"></div>
+          <div class="ep-mini-field"><label>Dec</label><input type="number" id="so-12" value="0" min="0" data-default="0"></div>
+        </div>
+      </div>
+
+      <div class="ep-section">
+        <div class="ep-section-title">📊 Risk Distribution by Area</div>
+        <p style="font-size:10px; color:var(--text-dim); margin-bottom:12px;">6개 영역 · 2026 vs 2025</p>
+        <div style="display:grid; grid-template-columns: 1fr; gap:8px;">
+          <div style="font-size:10px; font-weight:700; color:var(--text-secondary); display:grid; grid-template-columns:1fr 60px 60px; gap:6px; text-transform:uppercase; letter-spacing:0.5px;">
+            <span>Area</span><span style="text-align:center;color:#1565c0">2026</span><span style="text-align:center;color:rgba(21,101,192,0.5)">2025</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--text-secondary)">Dept. specific</span>
+            <input type="number" id="risk-25-0" value="17" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="17">
+            <input type="number" id="risk-24-0" value="19" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="19">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--text-secondary)">Maintenance</span>
+            <input type="number" id="risk-25-1" value="9" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="9">
+            <input type="number" id="risk-24-1" value="9" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="9">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--text-secondary)">Machine Tools</span>
+            <input type="number" id="risk-25-2" value="23" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="23">
+            <input type="number" id="risk-24-2" value="25" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="25">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--text-secondary)">Facility Mgmt</span>
+            <input type="number" id="risk-25-3" value="26" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="26">
+            <input type="number" id="risk-24-3" value="26" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="26">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--text-secondary)">Storage room</span>
+            <input type="number" id="risk-25-4" value="1" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="1">
+            <input type="number" id="risk-24-4" value="1" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="1">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--text-secondary)">Test bench</span>
+            <input type="number" id="risk-25-5" value="6" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="6">
+            <input type="number" id="risk-24-5" value="6" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="6">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EP TAB 2: ACTIVITIES ── -->
+    <div class="ep-sub" id="ep-sub-2">
+
+      <div class="ep-section">
+        <div class="ep-section-title">📅 Safety Campaign (Plan vs Actual)</div>
+        <div style="display:grid; grid-template-columns:1fr; gap:8px;">
+          <div style="font-size:10px; font-weight:700; color:var(--text-secondary); display:grid; grid-template-columns:1fr 60px 60px; gap:6px; text-transform:uppercase; letter-spacing:0.5px;">
+            <span>Campaign</span><span style="text-align:center;color:#b4bec8">Plan</span><span style="text-align:center;color:#1565c0">Actual</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--text-secondary)">Homefit</span>
+            <input type="number" id="camp-p-0" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+            <input type="number" id="camp-a-0" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--text-secondary)">Smombie</span>
+            <input type="number" id="camp-p-1" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+            <input type="number" id="camp-a-1" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--text-secondary)">STOP campaign</span>
+            <input type="number" id="camp-p-2" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+            <input type="number" id="camp-a-2" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 60px 60px; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--text-secondary)">Safety Hero Award</span>
+            <input type="number" id="camp-p-3" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+            <input type="number" id="camp-a-3" value="0" min="0" style="padding:5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center;font-family:'Bebas Neue';outline:none;" data-default="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="ep-section">
+        <div class="ep-section-title">🚒 Emergency Drill Completion Rate (%)</div>
+        <div class="ep-grid-3">
+          <div class="ep-field">
+            <label>🔥 Fire Drill</label>
+            <input type="number" id="drill-fire-val" value="0" min="0" max="100" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>🚨 SAPA Drill</label>
+            <input type="number" id="drill-sapa-val" value="0" min="0" max="100" data-default="0">
+          </div>
+          <div class="ep-field">
+            <label>🩺 First Aid</label>
+            <input type="number" id="drill-aid-val" value="0" min="0" max="100" data-default="0">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EP TAB 3: AUDIT ── -->
+    <div class="ep-sub active" id="ep-sub-3">
+
+      <div class="ep-section">
+        <div class="ep-section-title">🔍 Audit Findings</div>
+        <p style="font-size:10px; color:var(--text-dim); margin-bottom:12px;">값이 0이면 Passed / Zero로 자동 표시됩니다</p>
+
+        <div style="margin-bottom:16px;">
+          <div class="ep-row-label">ISO 14001 (Environmental)</div>
+          <div class="ep-grid-3">
+            <div class="ep-field"><label>Major</label><input type="number" id="aud-14001-major-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>Minor</label><input type="number" id="aud-14001-minor-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>OFI</label><input type="number" id="aud-14001-ofi-inp" value="0" min="0" data-default="0"></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div class="ep-row-label">ISO 45001 (Occupational H&amp;S)</div>
+          <div class="ep-grid-3">
+            <div class="ep-field"><label>Major</label><input type="number" id="aud-45001-major-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>Minor</label><input type="number" id="aud-45001-minor-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>OFI</label><input type="number" id="aud-45001-ofi-inp" value="0" min="0" data-default="0"></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div class="ep-row-label">Government</div>
+          <div class="ep-grid-3">
+            <div class="ep-field"><label>Major</label><input type="number" id="aud-gov-major-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>Minor</label><input type="number" id="aud-gov-minor-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>OFI</label><input type="number" id="aud-gov-ofi-inp" value="0" min="0" data-default="0"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="ep-row-label">Compliance Audit</div>
+          <div class="ep-grid-3">
+            <div class="ep-field"><label>Major</label><input type="number" id="aud-comp-major-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>Minor</label><input type="number" id="aud-comp-minor-inp" value="0" min="0" data-default="0"></div>
+            <div class="ep-field"><label>OFI</label><input type="number" id="aud-comp-ofi-inp" value="0" min="0" data-default="0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- ep-body -->
+
+  <div class="ep-footer">
+    <button class="ep-reset-btn" onclick="resetValues()">초기화</button>
+    <button class="ep-apply-btn" onclick="applyValues()">✓ 적용하기</button>
+  </div>
+</div>
+
+<script>
+/* ── UTILS ──────────────────────────────────────── */
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const QUARTERS = ['1Q','2Q','3Q','4Q'];
+
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#ffffff',
+      titleColor: '#1a1f2e',
+      bodyColor: '#5a6478',
+      borderColor: '#dde1e7',
+      borderWidth: 1,
+    }
+  },
+  scales: {
+    x: { ticks: { color: '#9aa0ad', font: { size: 10 } }, grid: { color: 'rgba(200,210,220,0.5)' } },
+    y: { ticks: { color: '#9aa0ad', font: { size: 10 } }, grid: { color: 'rgba(200,210,220,0.5)' }, beginAtZero: true }
+  }
+};
+
+function makeChart(id, type, labels, datasets, extraOpts = {}) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  return new Chart(ctx, {
+    type,
+    data: { labels, datasets },
+    options: { ...chartDefaults, ...extraOpts }
+  });
+}
+
+function getVals(prefix, count) {
+  return Array.from({length: count}, (_, i) => parseFloat(document.getElementById(prefix + (i+1))?.value) || 0);
+}
+function getVal(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+
+/* ── CHARTS ─────────────────────────────────────── */
+const chartInspection = makeChart('chart-inspection', 'bar', QUARTERS, [
+  { label: 'Findings', data: [0,0,0,0], backgroundColor: 'rgba(41,121,255,0.7)', borderColor: '#2979ff', borderWidth: 1, borderRadius: 4 },
+  { label: 'Improvements', data: [0,0,0,0], backgroundColor: 'rgba(0,200,83,0.7)', borderColor: '#00c853', borderWidth: 1, borderRadius: 4 }
+]);
+
+const chartTraining = makeChart('chart-training', 'bar', MONTHS, [
+  { label: 'Buy', data: [0,0,0,0,0,0,0,0,0,0,0,0], backgroundColor: 'rgba(21,101,192,0.6)', borderColor: '#1565c0', borderWidth: 1, borderRadius: 3 },
+  { label: 'Yo',  data: [0,0,0,0,0,0,0,0,0,0,0,0], backgroundColor: 'rgba(46,125,50,0.5)',  borderColor: '#2e7d32', borderWidth: 1, borderRadius: 3 }
+]);
+
+const chartNearmiss = makeChart('chart-nearmiss', 'line', MONTHS, [
+  { label: 'Near Miss',         data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#ffab00', backgroundColor: 'rgba(255,171,0,0.1)', tension: 0.4, fill: true, pointBackgroundColor: '#ffab00', pointRadius: 4 },
+  { label: 'Safety Observation',data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#2979ff', backgroundColor: 'rgba(41,121,255,0.08)', tension: 0.4, fill: true, pointBackgroundColor: '#2979ff', pointRadius: 4 }
+]);
+
+const riskLabels = ['Dept. specific process','Maintenance','Machine Tools','Facility management','Storage room','Test bench'];
+const chartRisk = makeChart('chart-risk', 'bar', riskLabels, [
+  { label: '2026', data: [17,9,23,26,1,6], backgroundColor: 'rgba(21,101,192,0.7)', borderColor: '#1565c0', borderWidth: 1, borderRadius: 3 },
+  { label: '2025', data: [19,9,25,26,1,6], backgroundColor: 'rgba(21,101,192,0.2)', borderColor: 'rgba(21,101,192,0.4)', borderWidth: 1, borderRadius: 3 }
+], {
+  indexAxis: 'y',
+  scales: {
+    x: { ticks: { color: '#9aa0ad', font: { size: 10 } }, grid: { color: 'rgba(200,210,220,0.5)' }, beginAtZero: true },
+    y: { ticks: { color: '#5a6478', font: { size: 10 } }, grid: { color: 'rgba(200,210,220,0.3)' } }
+  }
+});
+
+const chartCampaign = makeChart('chart-campaign', 'bar',
+  ['Homefit','Smombie','STOP campaign','Safety Hero Award'],
+  [
+    { label: 'Plan',   data: [0,0,0,0], backgroundColor: 'rgba(180,190,200,0.7)', borderColor: '#b4bec8', borderWidth: 1, borderRadius: 4 },
+    { label: 'Actual', data: [0,0,0,0], backgroundColor: 'rgba(21,101,192,0.7)',  borderColor: '#1565c0', borderWidth: 1, borderRadius: 4 }
+  ]
+);
+
+/* ── LOCALSTORAGE SAVE / LOAD ────────────────────── */
+const LS_KEY = 'ehs_kpi_dashboard_v1';
+
+function saveToStorage() {
+  const data = {};
+  document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
+    data[inp.id] = inp.value;
+  });
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+  } catch(e) {
+    console.warn('localStorage 저장 실패:', e);
+  }
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    Object.entries(data).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+    return true;
+  } catch(e) {
+    console.warn('localStorage 불러오기 실패:', e);
+    return false;
+  }
+}
+
+function clearStorage() {
+  try { localStorage.removeItem(LS_KEY); } catch(e) {}
+}
+
+/* ── APPLY VALUES ───────────────────────────────── */
+function applyValues(silent = false) {
+  // KPI Cards
+  const kpiMap = [
+    ['fatal','v-fatal','p-fatal'],
+    ['report','v-report','p-report'],
+    ['lwd','v-lwd','p-lwd'],
+    ['rate','v-rate','p-rate'],
+    ['fire','v-fire','p-fire'],
+  ];
+  kpiMap.forEach(([key, vId, pId]) => {
+    const cur = document.getElementById('inp-' + key + '-cur').value;
+    const prev = document.getElementById('inp-' + key + '-prev').value;
+    document.getElementById(vId).textContent = cur;
+    document.getElementById(pId).textContent = '(' + prev + ')';
+  });
+
+  // Inspection chart
+  chartInspection.data.datasets[0].data = getVals('insp-f-', 4);
+  chartInspection.data.datasets[1].data = getVals('insp-i-', 4);
+  chartInspection.update();
+
+  // Training chart
+  chartTraining.data.datasets[0].data = getVals('tr-b-', 12);
+  chartTraining.data.datasets[1].data = getVals('tr-y-', 12);
+  chartTraining.update();
+
+  // Near Miss chart
+  chartNearmiss.data.datasets[0].data = getVals('nm-', 12);
+  chartNearmiss.data.datasets[1].data = getVals('so-', 12);
+  chartNearmiss.update();
+
+  // Risk chart
+  chartRisk.data.datasets[0].data = [0,1,2,3,4,5].map(i => getVal('risk-25-' + i));
+  chartRisk.data.datasets[1].data = [0,1,2,3,4,5].map(i => getVal('risk-24-' + i));
+  chartRisk.update();
+
+  // Campaign chart
+  chartCampaign.data.datasets[0].data = [0,1,2,3].map(i => getVal('camp-p-' + i));
+  chartCampaign.data.datasets[1].data = [0,1,2,3].map(i => getVal('camp-a-' + i));
+  chartCampaign.update();
+
+  // Drill bars
+  ['fire','sapa','aid'].forEach(key => {
+    const val = Math.min(100, Math.max(0, getVal('drill-' + key + '-val')));
+    document.getElementById('drill-' + key).textContent = val + '%';
+    document.getElementById('bar-' + key).style.width = val + '%';
+  });
+
+  // Audit table
+  const auditRows = [
+    { id: '14001', statusEl: 'aud-14001-status' },
+    { id: '45001', statusEl: 'aud-45001-status' },
+    { id: 'gov',   statusEl: 'aud-gov-status'   },
+    { id: 'comp',  statusEl: 'aud-comp-status'  },
+  ];
+  auditRows.forEach(row => {
+    ['major','minor','ofi'].forEach(type => {
+      const val = getVal('aud-' + row.id + '-' + type + '-inp');
+      const el = document.getElementById('aud-' + row.id + '-' + type);
+      el.textContent = val;
+      if (val === 0) {
+        el.className = 'finding-num zero';
+      } else if (type === 'major') {
+        el.className = 'finding-num major';
+      } else if (type === 'minor') {
+        el.className = 'finding-num minor';
+      } else {
+        el.className = 'finding-num'; // OFI: 색상 변경 없음
+      }
+    });
+    const major = getVal('aud-' + row.id + '-major-inp');
+    const minor = getVal('aud-' + row.id + '-minor-inp');
+    const ofi   = getVal('aud-' + row.id + '-ofi-inp');
+    const statusEl = document.getElementById(row.statusEl);
+    if (major > 0) {
+      // Major 있음 → 빨간색
+      statusEl.className = 'status-badge';
+      statusEl.style.background = 'var(--red-dim)';
+      statusEl.style.color = 'var(--red)';
+      statusEl.style.border = '1px solid rgba(229,57,53,0.3)';
+      statusEl.textContent = '✗ Major Finding';
+    } else if (minor > 0) {
+      // Minor 있음 (Major 없음) → 노란색
+      statusEl.className = 'status-badge';
+      statusEl.style.background = 'var(--amber-dim)';
+      statusEl.style.color = 'var(--amber)';
+      statusEl.style.border = '1px solid rgba(245,158,11,0.3)';
+      statusEl.textContent = '⚠ Minor Finding';
+    } else {
+      // OFI만 있거나 모두 0 → Passed
+      statusEl.className = 'status-badge ' + (row.id === 'gov' ? 'no-findings' : 'passed');
+      statusEl.textContent = row.id === 'gov' ? '— No Findings' : '✓ Passed';
+      statusEl.style.cssText = '';
+    }
+  });
+
+  // 저장
+  saveToStorage();
+
+  if (silent) return;
+
+  // Flash applied
+  const btn = document.querySelector('.ep-apply-btn');
+  btn.textContent = '✓ 저장 & 적용 완료!';
+  btn.style.background = 'var(--green)';
+  setTimeout(() => {
+    btn.textContent = '✓ 적용하기';
+    btn.style.background = '';
+  }, 1800);
+
+  // 저장 알림 뱃지 표시
+  showSavedBadge();
+}
+
+function showSavedBadge() {
+  let badge = document.getElementById('saved-badge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'saved-badge';
+    badge.style.cssText = `
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+      background:#1a1f2e; color:#fff; font-size:11px; font-weight:600;
+      letter-spacing:1px; padding:10px 20px; border-radius:24px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.25); z-index:9999;
+      display:flex; align-items:center; gap:8px;
+      transition:opacity 0.4s; white-space:nowrap;
+    `;
+    document.body.appendChild(badge);
+  }
+  badge.innerHTML = '💾 값이 자동 저장되었습니다 — 다음에 열어도 유지됩니다';
+  badge.style.opacity = '1';
+  clearTimeout(badge._timer);
+  badge._timer = setTimeout(() => { badge.style.opacity = '0'; }, 2800);
+}
+
+function resetValues() {
+  if (!confirm('모든 값을 초기화(0)하시겠습니까?\n저장된 데이터도 삭제됩니다.')) return;
+  document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
+    inp.value = inp.getAttribute('data-default') || 0;
+  });
+  clearStorage();
+  applyValues();
+}
+
+/* ── PASSWORD MODAL ──────────────────────────────── */
+const PW_CORRECT = '0119';
+let pwBuffer = '';
+
+function openPwModal() {
+  pwBuffer = '';
+  updateDots();
+  document.getElementById('pw-error').textContent = '';
+  document.getElementById('pwOverlay').classList.add('open');
+}
+
+function closePwModal() {
+  document.getElementById('pwOverlay').classList.remove('open');
+  pwBuffer = '';
+  updateDots();
+  document.getElementById('pw-error').textContent = '';
+}
+
+function updateDots() {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('dot-' + i);
+    dot.className = 'pw-dot' + (i < pwBuffer.length ? ' filled' : '');
+  }
+}
+
+function pwInput(digit) {
+  if (pwBuffer.length >= 4) return;
+  pwBuffer += digit;
+  updateDots();
+  if (pwBuffer.length === 4) {
+    setTimeout(checkPassword, 150);
+  }
+}
+
+function pwDelete() {
+  if (pwBuffer.length === 0) return;
+  pwBuffer = pwBuffer.slice(0, -1);
+  updateDots();
+  document.getElementById('pw-error').textContent = '';
+}
+
+function checkPassword() {
+  if (pwBuffer === PW_CORRECT) {
+    closePwModal();
+    openEditPanel();
+  } else {
+    // 오류 표시
+    for (let i = 0; i < 4; i++) {
+      document.getElementById('dot-' + i).className = 'pw-dot error';
+    }
+    document.getElementById('pw-error').textContent = '비밀번호가 틀렸습니다';
+    setTimeout(() => {
+      pwBuffer = '';
+      updateDots();
+      document.getElementById('pw-error').textContent = '';
+    }, 1000);
+  }
+}
+
+// 키보드 입력 지원
+document.addEventListener('keydown', function(e) {
+  const overlay = document.getElementById('pwOverlay');
+  if (!overlay.classList.contains('open')) return;
+  if (e.key >= '0' && e.key <= '9') pwInput(e.key);
+  if (e.key === 'Backspace') pwDelete();
+  if (e.key === 'Escape') closePwModal();
+});
+
+/* ── EDIT PANEL ─────────────────────────────────── */
+function toggleEditPanel() {
+  const panel = document.getElementById('editPanel');
+  if (panel.classList.contains('open')) {
+    closeEditPanel();
+  } else {
+    openPwModal();
+  }
+}
+
+function openEditPanel() {
+  const panel = document.getElementById('editPanel');
+  const overlay = document.getElementById('editOverlay');
+  const btn = document.getElementById('editToggleBtn');
+  panel.classList.add('open');
+  overlay.classList.add('open');
+  btn.classList.add('active');
+  btn.textContent = '✕ 닫기';
+  document.body.classList.add('edit-mode');
+}
+
+function closeEditPanel() {
+  document.getElementById('editPanel').classList.remove('open');
+  document.getElementById('editOverlay').classList.remove('open');
+  const btn = document.getElementById('editToggleBtn');
+  btn.classList.remove('active');
+  btn.textContent = '✏️ 값 편집';
+  document.body.classList.remove('edit-mode');
+}
+
+function switchEpTab(idx, btn) {
+  document.querySelectorAll('.ep-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.ep-sub').forEach(s => s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ep-sub-' + idx).classList.add('active');
+}
+
+/* ── TABS ─────────────────────────────────────────── */
+function switchTab(idx, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + idx).classList.add('active');
+  btn.classList.add('active');
+  // Sync edit panel tab
+  const epTabs = document.querySelectorAll('.ep-tab');
+  if (epTabs[idx]) switchEpTab(idx, epTabs[idx]);
+}
+
+/* ── FOOTER ──────────────────────────────────────── */
+document.getElementById('footer-year').textContent = new Date().getFullYear() + ' EHS Team';
+
+// Store defaults (원래 HTML에 정의된 기본값 기억)
+document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
+  inp.setAttribute('data-default', inp.value);
+});
+
+/* ── AUTO-LOAD ON START ──────────────────────────── */
+(function initDashboard() {
+  const restored = loadFromStorage();
+  if (restored) {
+    applyValues(true);
+    setTimeout(() => {
+      let badge = document.createElement('div');
+      badge.style.cssText = [
+        'position:fixed','bottom:24px','left:50%','transform:translateX(-50%)',
+        'background:#1565c0','color:#fff','font-size:11px','font-weight:600',
+        'letter-spacing:1px','padding:10px 22px','border-radius:24px',
+        'box-shadow:0 4px 20px rgba(21,101,192,0.35)','z-index:9999',
+        'display:flex','align-items:center','gap:8px','white-space:nowrap',
+        'transition:opacity 0.5s'
+      ].join(';');
+      badge.textContent = '\uD83D\uDD04 저장된 데이터를 불러왔습니다';
+      document.body.appendChild(badge);
+      setTimeout(() => {
+        badge.style.opacity = '0';
+        setTimeout(() => badge.remove(), 600);
+      }, 2500);
+    }, 600);
+  }
+})();
+</script>
+
+
+</body></html>
