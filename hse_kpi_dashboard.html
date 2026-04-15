@@ -1,10 +1,9 @@
-<!DOCTYPE html>
 <html lang="ko"><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EHS KPI Management Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Noto+Sans+KR:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
@@ -649,7 +648,7 @@
   .pw-cancel:hover { color: var(--text-secondary); }
 </style>
 </head>
-<body>
+<body class="edit-mode">
 
 <!-- HEADER -->
 <header>
@@ -662,28 +661,26 @@
   <div class="header-meta">
     <span class="update-badge" id="asof-date">As of Apr. 2026</span>
     <div class="live-dot"></div>
-    <button class="edit-toggle-btn" id="editToggleBtn" onclick="toggleEditPanel()">
-      ✏️ 값 편집
-    </button>
+    <button class="edit-toggle-btn active" id="editToggleBtn" onclick="toggleEditPanel()">✕ 닫기</button>
   </div>
 </header>
 
 <!-- TABS -->
 <div class="tab-bar">
-  <button class="tab-btn" onclick="switchTab(0, this)">Section 1 — Lagging</button>
+  <button class="tab-btn active" onclick="switchTab(0, this)">Section 1 — Lagging</button>
   <button class="tab-btn" onclick="switchTab(1, this)">Section 2 — Leading</button>
   <button class="tab-btn" onclick="switchTab(2, this)">Section 3 — Activities</button>
-  <button class="tab-btn active" onclick="switchTab(3, this)">Section 4 — Audit</button>
+  <button class="tab-btn" onclick="switchTab(3, this)">Section 4 — Audit</button>
 </div>
 
 <main>
 
 <!-- ══════════════ PAGE 1: LAGGING ══════════════ -->
-<div class="page" id="page-0">
+<div class="page active" id="page-0">
   <div class="section-label"><span>01</span>Safety Lagging Indicators &nbsp;·&nbsp; *2026 (2025)</div>
 
   <div class="grid-5" style="margin-bottom:24px;">
-    <div class="stat-card green" id="card-fatal" data-card="fatal">
+    <div class="stat-card green border-green" id="card-fatal" data-card="fatal">
       <div class="card-color-picker">
         <div class="color-btn cb-green active" title="녹색" onclick="setCardColor('fatal','green',this)"></div>
         <div class="color-btn cb-amber" title="노란색" onclick="setCardColor('fatal','amber',this)"></div>
@@ -696,7 +693,7 @@
       </div>
       <div class="stat-status ok" id="s-fatal">● CLEAR</div>
     </div>
-    <div class="stat-card green" id="card-report" data-card="report">
+    <div class="stat-card green border-green" id="card-report" data-card="report">
       <div class="card-color-picker">
         <div class="color-btn cb-green active" title="녹색" onclick="setCardColor('report','green',this)"></div>
         <div class="color-btn cb-amber" title="노란색" onclick="setCardColor('report','amber',this)"></div>
@@ -709,7 +706,7 @@
       </div>
       <div class="stat-status ok" id="s-report">● CLEAR</div>
     </div>
-    <div class="stat-card green" id="card-lwd" data-card="lwd">
+    <div class="stat-card green border-green" id="card-lwd" data-card="lwd">
       <div class="card-color-picker">
         <div class="color-btn cb-green active" title="녹색" onclick="setCardColor('lwd','green',this)"></div>
         <div class="color-btn cb-amber" title="노란색" onclick="setCardColor('lwd','amber',this)"></div>
@@ -722,7 +719,7 @@
       </div>
       <div class="stat-status ok" id="s-lwd">● CLEAR</div>
     </div>
-    <div class="stat-card green" id="card-rate" data-card="rate">
+    <div class="stat-card green border-green" id="card-rate" data-card="rate">
       <div class="card-color-picker">
         <div class="color-btn cb-green active" title="녹색" onclick="setCardColor('rate','green',this)"></div>
         <div class="color-btn cb-amber" title="노란색" onclick="setCardColor('rate','amber',this)"></div>
@@ -735,15 +732,15 @@
       </div>
       <div class="stat-status ok" id="s-rate">● ON TARGET</div>
     </div>
-    <div class="stat-card red" id="card-fire" data-card="fire">
+    <div class="stat-card amber border-amber" id="card-fire" data-card="fire">
       <div class="card-color-picker">
         <div class="color-btn cb-green" title="녹색" onclick="setCardColor('fire','green',this)"></div>
-        <div class="color-btn cb-amber" title="노란색" onclick="setCardColor('fire','amber',this)"></div>
-        <div class="color-btn cb-red active" title="붉은색" onclick="setCardColor('fire','red',this)"></div>
+        <div class="color-btn cb-amber active" title="노란색" onclick="setCardColor('fire','amber',this)"></div>
+        <div class="color-btn cb-red" title="붉은색" onclick="setCardColor('fire','red',this)"></div>
       </div>
       <div class="stat-label">Fire Accident</div>
       <div class="stat-value-row">
-        <div class="stat-value" id="v-fire">0</div>
+        <div class="stat-value" id="v-fire" style="color: var(--amber);">0</div>
         <div class="stat-prev" id="p-fire">(1)</div>
       </div>
       <div class="stat-status ok" id="s-fire">● IMPROVED</div>
@@ -762,7 +759,7 @@
           <div class="legend-item"><div class="legend-dot" style="background:#00c853"></div>Improvements</div>
         </div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-inspection" style="display: block; box-sizing: border-box; height: 200px; width: 719px;" width="719" height="200"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-inspection" style="display: block; box-sizing: border-box; height: 200px; width: 719px;" width="1079" height="300"></canvas></div>
     </div>
 
     <div class="chart-card">
@@ -776,7 +773,7 @@
           <div class="legend-item"><div class="legend-dot" style="background:#76ff03"></div>Yo</div>
         </div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-training" style="display: block; box-sizing: border-box; height: 200px; width: 719px;" width="719" height="200"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-training" style="display: block; box-sizing: border-box; height: 200px; width: 719px;" width="1079" height="300"></canvas></div>
     </div>
   </div>
 </div>
@@ -877,7 +874,7 @@
 </div>
 
 <!-- ══════════════ PAGE 4: AUDIT ══════════════ -->
-<div class="page active" id="page-3">
+<div class="page" id="page-3">
   <div class="section-label"><span>04</span>Audit &amp; Compliance</div>
 
   <div class="grid-2">
@@ -904,29 +901,29 @@
             <td>ISO 14001 (Environmental)</td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-14001-major">0</span></td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-14001-minor">0</span></td>
-            <td style="text-align:center;"><span class="finding-num zero" id="aud-14001-ofi">0</span></td>
-            <td><span class="status-badge passed" id="aud-14001-status">✓ Passed</span></td>
+            <td style="text-align:center;"><span class="finding-num" id="aud-14001-ofi">1</span></td>
+            <td><span class="status-badge passed" id="aud-14001-status" style="">✓ Passed</span></td>
           </tr>
           <tr>
             <td>ISO 45001 (Occupational H&amp;S)</td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-45001-major">0</span></td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-45001-minor">0</span></td>
-            <td style="text-align:center;"><span class="finding-num zero" id="aud-45001-ofi">0</span></td>
-            <td><span class="status-badge passed" id="aud-45001-status">✓ Passed</span></td>
+            <td style="text-align:center;"><span class="finding-num" id="aud-45001-ofi">6</span></td>
+            <td><span class="status-badge passed" id="aud-45001-status" style="">✓ Passed</span></td>
           </tr>
           <tr>
             <td>Government (District Office, Env. Check)</td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-gov-major">0</span></td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-gov-minor">0</span></td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-gov-ofi">0</span></td>
-            <td><span class="status-badge no-findings" id="aud-gov-status">— No Findings</span></td>
+            <td><span class="status-badge no-findings" id="aud-gov-status" style="">— No Findings</span></td>
           </tr>
           <tr>
             <td>Compliance Audit</td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-comp-major">0</span></td>
             <td style="text-align:center;"><span class="finding-num zero" id="aud-comp-minor">0</span></td>
-            <td style="text-align:center;"><span class="finding-num zero" id="aud-comp-ofi">0</span></td>
-            <td><span class="status-badge passed" id="aud-comp-status">✓ Passed</span></td>
+            <td style="text-align:center;"><span class="finding-num" id="aud-comp-ofi">10</span></td>
+            <td><span class="status-badge passed" id="aud-comp-status" style="">✓ Passed</span></td>
           </tr>
         </tbody>
       </table>
@@ -979,9 +976,9 @@
 <!-- ═══════════════════════════════════════════════
      EDIT PANEL
 ═══════════════════════════════════════════════ -->
-<div class="edit-panel-overlay" id="editOverlay" onclick="closeEditPanel()"></div>
+<div class="edit-panel-overlay open" id="editOverlay" onclick="closeEditPanel()"></div>
 
-<div class="edit-panel" id="editPanel">
+<div class="edit-panel open" id="editPanel">
   <div class="ep-header">
     <h2>📊 값 편집</h2>
     <span style="font-size:10px; color:var(--text-dim); letter-spacing:1px;">EDIT VALUES</span>
@@ -1007,41 +1004,41 @@
           <div class="ep-color-row">
             <span class="ep-color-label">Fatal Accident</span>
             <div class="ep-color-btns">
-              <button class="ep-color-btn ep-green" id="cpb-fatal-green"  onclick="setCardColor('fatal','green',null,'fatal-green')">● 녹색</button>
-              <button class="ep-color-btn ep-amber" id="cpb-fatal-amber"  onclick="setCardColor('fatal','amber',null,'fatal-amber')">● 노란색</button>
-              <button class="ep-color-btn ep-red"   id="cpb-fatal-red"    onclick="setCardColor('fatal','red',null,'fatal-red')">● 붉은색</button>
+              <button class="ep-color-btn ep-green ep-active" id="cpb-fatal-green" onclick="setCardColor('fatal','green',null,'fatal-green')">● 녹색</button>
+              <button class="ep-color-btn ep-amber" id="cpb-fatal-amber" onclick="setCardColor('fatal','amber',null,'fatal-amber')">● 노란색</button>
+              <button class="ep-color-btn ep-red" id="cpb-fatal-red" onclick="setCardColor('fatal','red',null,'fatal-red')">● 붉은색</button>
             </div>
           </div>
           <div class="ep-color-row">
             <span class="ep-color-label">Reportable Accident</span>
             <div class="ep-color-btns">
-              <button class="ep-color-btn ep-green" id="cpb-report-green" onclick="setCardColor('report','green',null,'report-green')">● 녹색</button>
+              <button class="ep-color-btn ep-green ep-active" id="cpb-report-green" onclick="setCardColor('report','green',null,'report-green')">● 녹색</button>
               <button class="ep-color-btn ep-amber" id="cpb-report-amber" onclick="setCardColor('report','amber',null,'report-amber')">● 노란색</button>
-              <button class="ep-color-btn ep-red"   id="cpb-report-red"   onclick="setCardColor('report','red',null,'report-red')">● 붉은색</button>
+              <button class="ep-color-btn ep-red" id="cpb-report-red" onclick="setCardColor('report','red',null,'report-red')">● 붉은색</button>
             </div>
           </div>
           <div class="ep-color-row">
             <span class="ep-color-label">Lost of Work-Days</span>
             <div class="ep-color-btns">
-              <button class="ep-color-btn ep-green" id="cpb-lwd-green"    onclick="setCardColor('lwd','green',null,'lwd-green')">● 녹색</button>
-              <button class="ep-color-btn ep-amber" id="cpb-lwd-amber"    onclick="setCardColor('lwd','amber',null,'lwd-amber')">● 노란색</button>
-              <button class="ep-color-btn ep-red"   id="cpb-lwd-red"      onclick="setCardColor('lwd','red',null,'lwd-red')">● 붉은색</button>
+              <button class="ep-color-btn ep-green ep-active" id="cpb-lwd-green" onclick="setCardColor('lwd','green',null,'lwd-green')">● 녹색</button>
+              <button class="ep-color-btn ep-amber" id="cpb-lwd-amber" onclick="setCardColor('lwd','amber',null,'lwd-amber')">● 노란색</button>
+              <button class="ep-color-btn ep-red" id="cpb-lwd-red" onclick="setCardColor('lwd','red',null,'lwd-red')">● 붉은색</button>
             </div>
           </div>
           <div class="ep-color-row">
             <span class="ep-color-label">Accident Rate</span>
             <div class="ep-color-btns">
-              <button class="ep-color-btn ep-green" id="cpb-rate-green"   onclick="setCardColor('rate','green',null,'rate-green')">● 녹색</button>
-              <button class="ep-color-btn ep-amber" id="cpb-rate-amber"   onclick="setCardColor('rate','amber',null,'rate-amber')">● 노란색</button>
-              <button class="ep-color-btn ep-red"   id="cpb-rate-red"     onclick="setCardColor('rate','red',null,'rate-red')">● 붉은색</button>
+              <button class="ep-color-btn ep-green ep-active" id="cpb-rate-green" onclick="setCardColor('rate','green',null,'rate-green')">● 녹색</button>
+              <button class="ep-color-btn ep-amber" id="cpb-rate-amber" onclick="setCardColor('rate','amber',null,'rate-amber')">● 노란색</button>
+              <button class="ep-color-btn ep-red" id="cpb-rate-red" onclick="setCardColor('rate','red',null,'rate-red')">● 붉은색</button>
             </div>
           </div>
           <div class="ep-color-row">
             <span class="ep-color-label">Fire Accident</span>
             <div class="ep-color-btns">
-              <button class="ep-color-btn ep-green" id="cpb-fire-green"   onclick="setCardColor('fire','green',null,'fire-green')">● 녹색</button>
-              <button class="ep-color-btn ep-amber" id="cpb-fire-amber"   onclick="setCardColor('fire','amber',null,'fire-amber')">● 노란색</button>
-              <button class="ep-color-btn ep-red"   id="cpb-fire-red"     onclick="setCardColor('fire','red',null,'fire-red')">● 붉은색</button>
+              <button class="ep-color-btn ep-green" id="cpb-fire-green" onclick="setCardColor('fire','green',null,'fire-green')">● 녹색</button>
+              <button class="ep-color-btn ep-amber ep-active" id="cpb-fire-amber" onclick="setCardColor('fire','amber',null,'fire-amber')">● 노란색</button>
+              <button class="ep-color-btn ep-red" id="cpb-fire-red" onclick="setCardColor('fire','red',null,'fire-red')">● 붉은색</button>
             </div>
           </div>
         </div>
@@ -1324,11 +1321,13 @@
 
   <div class="ep-footer">
     <button class="ep-reset-btn" onclick="resetValues()">초기화</button>
-    <button class="ep-apply-btn" onclick="applyValues()">✓ 적용하기</button>
+    <button class="ep-apply-btn" onclick="applyValues()" style="background: var(--amber);" disabled="">⏳ 저장 중...</button>
   </div>
 </div>
 
+<script id="ks">/*S1*/var __KD__={"inp-fatal-cur":"0","inp-fatal-prev":"0","inp-report-cur":"0","inp-report-prev":"0","inp-lwd-cur":"0","inp-lwd-prev":"0","inp-rate-cur":"0","inp-rate-prev":"0","inp-fire-cur":"0","inp-fire-prev":"1","insp-f-1":"4","insp-f-2":"0","insp-f-3":"0","insp-f-4":"0","insp-i-1":"2","insp-i-2":"0","insp-i-3":"0","insp-i-4":"0","tr-b-1":"0","tr-b-2":"0","tr-b-3":"0","tr-b-4":"0","tr-b-5":"0","tr-b-6":"0","tr-b-7":"0","tr-b-8":"0","tr-b-9":"0","tr-b-10":"0","tr-b-11":"0","tr-b-12":"0","tr-y-1":"3","tr-y-2":"0","tr-y-3":"9","tr-y-4":"0","tr-y-5":"0","tr-y-6":"0","tr-y-7":"0","tr-y-8":"0","tr-y-9":"0","tr-y-10":"0","tr-y-11":"0","tr-y-12":"0","nm-1":"0","nm-2":"0","nm-3":"0","nm-4":"0","nm-5":"0","nm-6":"0","nm-7":"0","nm-8":"0","nm-9":"0","nm-10":"0","nm-11":"0","nm-12":"0","so-1":"0","so-2":"0","so-3":"0","so-4":"0","so-5":"0","so-6":"0","so-7":"0","so-8":"0","so-9":"0","so-10":"0","so-11":"0","so-12":"0","risk-25-0":"12","risk-24-0":"17","risk-25-1":"0","risk-24-1":"9","risk-25-2":"5","risk-24-2":"23","risk-25-3":"15","risk-24-3":"26","risk-25-4":"0","risk-24-4":"1","risk-25-5":"6","risk-24-5":"6","camp-p-0":"0","camp-a-0":"0","camp-p-1":"0","camp-a-1":"0","camp-p-2":"0","camp-a-2":"0","camp-p-3":"0","camp-a-3":"0","drill-fire-val":"0","drill-sapa-val":"0","drill-aid-val":"0","aud-14001-major-inp":"0","aud-14001-minor-inp":"0","aud-14001-ofi-inp":"1","aud-45001-major-inp":"0","aud-45001-minor-inp":"0","aud-45001-ofi-inp":"6","aud-gov-major-inp":"0","aud-gov-minor-inp":"0","aud-gov-ofi-inp":"0","aud-comp-major-inp":"0","aud-comp-minor-inp":"0","aud-comp-ofi-inp":"10","__c_fatal":"green","__c_report":"green","__c_lwd":"green","__c_rate":"green","__c_fire":"amber"};/*S2*/</script>
 <script>
+const _D=__KD__;
 /* ── UTILS ──────────────────────────────────────── */
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const QUARTERS = ['1Q','2Q','3Q','4Q'];
@@ -1403,33 +1402,28 @@ const chartCampaign = makeChart('chart-campaign', 'bar',
   ]
 );
 
-/* ══════════════════════════════════════════════════
-   SAVE / LOAD  ─  IndexedDB 영구 저장
-   ─────────────────────────────────────────────────
-   IndexedDB 는 브라우저의 파일 경로(origin) 단위로
-   데이터를 영구 저장합니다.
-   ✓ 쿠키·캐시 삭제와 완전 무관
-   ✓ 같은 파일 경로에서 열면 항상 복원
-   ✓ HTML 파일 자체를 수정할 필요 없음
-═══════════════════════════════════════════════════ */
-const DB_NAME  = 'ehs_kpi_db';
-const DB_STORE = 'kpi_data';
-const DB_KEY   = 'saved';
-
-/* IndexedDB 열기 */
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = e => {
-      e.target.result.createObjectStore(DB_STORE);
-    };
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror   = e => reject(e.target.error);
+/* ── SAVE / LOAD ─────────────────────────────────── */
+function _col(key, color) {
+  const card = document.getElementById('card-' + key);
+  if (!card) return;
+  COLOR_OPTIONS.forEach(c => { card.classList.remove(c, 'border-' + c); });
+  card.classList.add(color, 'border-' + color);
+  COLOR_OPTIONS.forEach(c => {
+    const pb = document.getElementById('cpb-' + key + '-' + c);
+    if (pb) pb.classList.toggle('ep-active', c === color);
   });
+  const pk = card.querySelector('.card-color-picker');
+  if (pk) pk.querySelectorAll('.color-btn').forEach(b =>
+    b.classList.toggle('active', b.classList.contains('cb-' + color)));
+  const v = document.getElementById('v-' + key);
+  if (v) {
+    v.classList.remove('danger', 'neutral'); v.style.color = '';
+    if (color === 'red') v.classList.add('danger');
+    else if (color === 'amber') v.style.color = 'var(--amber)';
+  }
 }
 
-/* 모든 값 수집 (숫자 입력 + 카드 색상) */
-function collectAllData() {
+function saveToStorage() {
   const d = {};
   document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
     if (inp.id) d[inp.id] = inp.value;
@@ -1441,99 +1435,34 @@ function collectAllData() {
       if (card.classList.contains(c)) { d['__c_' + key] = c; break; }
     }
   });
-  return d;
+  const jstr = JSON.stringify(d);
+  const html = document.documentElement.outerHTML;
+  const m1 = html.indexOf('/*S1*/');
+  const m2 = html.indexOf('/*S2*/', m1);
+  if (m1 === -1 || m2 === -1) { console.error('저장 마커 없음'); return; }
+  const out = html.slice(0, m1 + 6) + 'var __KD__=' + jstr + ';' + html.slice(m2);
+  const blob = new Blob([out], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'hse_kpi_dashboard.html';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
 }
 
-/* IndexedDB 에 저장 */
-function saveToStorage() {
-  const data = collectAllData();
-  openDB().then(db => {
-    const tx = db.transaction(DB_STORE, 'readwrite');
-    tx.objectStore(DB_STORE).put(data, DB_KEY);
-  }).catch(e => {
-    /* IndexedDB 실패 시 localStorage fallback */
-    try { localStorage.setItem('ehs_kpi_v1', JSON.stringify(data)); } catch(_) {}
-  });
-}
-
-/* IndexedDB 에서 불러오기 */
 function loadFromStorage() {
-  return new Promise(resolve => {
-    openDB().then(db => {
-      const tx  = db.transaction(DB_STORE, 'readonly');
-      const req = tx.objectStore(DB_STORE).get(DB_KEY);
-      req.onsuccess = e => {
-        const d = e.target.result;
-        if (d && Object.keys(d).length) resolve(d);
-        else resolve(null);
-      };
-      req.onerror = () => resolve(null);
-    }).catch(() => {
-      /* fallback: localStorage */
-      try {
-        const raw = localStorage.getItem('ehs_kpi_v1');
-        resolve(raw ? JSON.parse(raw) : null);
-      } catch(_) { resolve(null); }
+  if (_D && typeof _D === 'object' && Object.keys(_D).length) {
+    Object.entries(_D).forEach(([id, val]) => {
+      if (id.startsWith('__c_')) return;
+      const el = document.getElementById(id);
+      if (el) el.value = val;
     });
-  });
-}
-
-/* 저장 데이터를 DOM 에 적용 */
-function restoreAllData(d) {
-  if (!d) return false;
-  Object.entries(d).forEach(([id, val]) => {
-    if (id.startsWith('__c_')) return;
-    const el = document.getElementById(id);
-    if (el) el.value = val;
-  });
-  CARD_KEYS.forEach(key => {
-    const col = d['__c_' + key] || CARD_COLOR_DEFAULTS[key];
-    applyCardColor(key, col);
-  });
-  return true;
-}
-
-/* IndexedDB 초기화 */
-function clearStorage() {
-  openDB().then(db => {
-    const tx = db.transaction(DB_STORE, 'readwrite');
-    tx.objectStore(DB_STORE).delete(DB_KEY);
-  }).catch(() => {
-    try { localStorage.removeItem('ehs_kpi_v1'); } catch(_) {}
-  });
-}
-
-/* 카드 색상 DOM 적용 (저장 없음, 순수 UI) */
-function applyCardColor(key, color) {
-  const card = document.getElementById('card-' + key);
-  if (!card) return;
-  COLOR_OPTIONS.forEach(c => {
-    card.classList.remove(c);
-    card.classList.remove('border-' + c);
-  });
-  card.classList.add(color);
-  card.classList.add('border-' + color);
-  /* 편집패널 버튼 */
-  COLOR_OPTIONS.forEach(c => {
-    const pb = document.getElementById('cpb-' + key + '-' + c);
-    if (pb) pb.classList.toggle('ep-active', c === color);
-  });
-  /* 카드 내 inline 버튼 */
-  const picker = card.querySelector('.card-color-picker');
-  if (picker) {
-    picker.querySelectorAll('.color-btn').forEach(b => {
-      b.classList.toggle('active', b.classList.contains('cb-' + color));
-    });
+    CARD_KEYS.forEach(key => _col(key, _D['__c_' + key] || CARD_COLOR_DEFAULTS[key]));
+    return true;
   }
-  /* 숫자 색상 */
-  const valEl = document.getElementById('v-' + key);
-  if (valEl) {
-    valEl.classList.remove('danger', 'neutral');
-    valEl.style.color = '';
-    if (color === 'red')   valEl.classList.add('danger');
-    else if (color === 'amber') valEl.style.color = 'var(--amber)';
-  }
+  return false;
 }
+
+function clearStorage() {}
 
 /* ── APPLY VALUES ───────────────────────────────── */
 function applyValues(silent = false) {
@@ -1632,18 +1561,20 @@ function applyValues(silent = false) {
     }
   });
 
-  // IndexedDB 에 저장
-  saveToStorage();
-
   if (silent) return;
 
   const btn = document.querySelector('.ep-apply-btn');
-  btn.textContent = '✓ 저장 & 적용 완료!';
-  btn.style.background = 'var(--green)';
+  btn.textContent = '⏳ 저장 중...';
+  btn.style.background = 'var(--amber)';
+  btn.disabled = true;
+
   setTimeout(() => {
-    btn.textContent = '✓ 적용하기';
-    btn.style.background = '';
-  }, 1800);
+    try { saveToStorage(); } catch(e) { console.error(e); }
+    btn.textContent = '✓ 저장 & 다운로드 완료!';
+    btn.style.background = 'var(--green)';
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = '✓ 적용하기'; btn.style.background = ''; }, 2200);
+  }, 150);
 
   showSavedBadge();
 }
@@ -1663,7 +1594,7 @@ function showSavedBadge() {
     `;
     document.body.appendChild(badge);
   }
-  badge.innerHTML = '💾 저장 완료 — 브라우저에 영구 보관됩니다 (쿠키 삭제와 무관)';
+  badge.innerHTML = '💾 저장 완료 — 다운로드된 파일로 기존 파일을 교체하세요';
   badge.style.opacity = '1';
   clearTimeout(badge._timer);
   badge._timer = setTimeout(() => { badge.style.opacity = '0'; }, 2800);
@@ -1799,37 +1730,34 @@ const CARD_KEYS = ['fatal','report','lwd','rate','fire'];
 const COLOR_OPTIONS = ['green','amber','red'];
 const CARD_COLOR_DEFAULTS = { fatal:'green', report:'green', lwd:'green', rate:'green', fire:'red' };
 
-function setCardColor(cardKey, color, btnEl) {
-  applyCardColor(cardKey, color);
-  saveToStorage();
-}
-
-function saveCardColors() { saveToStorage(); }
-
+function setCardColor(cardKey, color, btnEl) { _col(cardKey, color); }
+function saveCardColors() {}
 function loadCardColors() {
-  /* 기본색 먼저 적용 — 실제 복원은 initDashboard 의 비동기 loadFromStorage 에서 */
-  CARD_KEYS.forEach(key => applyCardColor(key, CARD_COLOR_DEFAULTS[key]));
+  CARD_KEYS.forEach(key => _col(key, CARD_COLOR_DEFAULTS[key]));
 }
 
 /* ── FOOTER ──────────────────────────────────────── */
 document.getElementById('footer-year').textContent = new Date().getFullYear() + ' EHS Team';
+(function(){const n=new Date(),M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+document.getElementById('asof-date').textContent='As of '+M[n.getMonth()]+'. '+n.getFullYear();})();
 
+// As of 날짜 자동 업데이트
 (function() {
   const now = new Date();
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('asof-date').textContent = 'As of ' + months[now.getMonth()] + '. ' + now.getFullYear();
 })();
 
+// Store defaults (원래 HTML에 정의된 기본값 기억)
 document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
   inp.setAttribute('data-default', inp.value);
 });
 
 /* ── AUTO-LOAD ON START ──────────────────────────── */
 (function initDashboard() {
-  loadCardColors(); // 기본색 먼저
-
-  loadFromStorage().then(d => {
-    if (!restoreAllData(d)) return;
+  loadCardColors();
+  const restored = loadFromStorage();
+  if (restored) {
     applyValues(true);
     setTimeout(() => {
       let badge = document.createElement('div');
@@ -1841,16 +1769,16 @@ document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
         'display:flex','align-items:center','gap:8px','white-space:nowrap',
         'transition:opacity 0.5s'
       ].join(';');
-      badge.textContent = '🔄 저장된 데이터를 불러왔습니다';
+      badge.textContent = '\uD83D\uDD04 저장된 데이터를 불러왔습니다';
       document.body.appendChild(badge);
       setTimeout(() => {
         badge.style.opacity = '0';
         setTimeout(() => badge.remove(), 600);
       }, 2500);
-    }, 400);
-  });
+    }, 600);
+  }
 })();
 </script>
 
 
-</body></html>
+<div id="saved-badge" style="position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgb(26, 31, 46); color: rgb(255, 255, 255); font-size: 11px; font-weight: 600; letter-spacing: 1px; padding: 10px 20px; border-radius: 24px; box-shadow: rgba(0, 0, 0, 0.25) 0px 4px 20px; z-index: 9999; display: flex; align-items: center; gap: 8px; transition: opacity 0.4s; white-space: nowrap; opacity: 1;">💾 저장 완료 — 다운로드된 파일로 기존 파일을 교체하세요</div></body></html>
