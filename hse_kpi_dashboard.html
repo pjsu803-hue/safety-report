@@ -1403,39 +1403,136 @@ const chartCampaign = makeChart('chart-campaign', 'bar',
   ]
 );
 
-/* ── LOCALSTORAGE SAVE / LOAD ────────────────────── */
-const LS_KEY = 'ehs_kpi_dashboard_v1';
+/* ══════════════════════════════════════════════════
+   SAVE / LOAD  ─  IndexedDB 영구 저장
+   ─────────────────────────────────────────────────
+   IndexedDB 는 브라우저의 파일 경로(origin) 단위로
+   데이터를 영구 저장합니다.
+   ✓ 쿠키·캐시 삭제와 완전 무관
+   ✓ 같은 파일 경로에서 열면 항상 복원
+   ✓ HTML 파일 자체를 수정할 필요 없음
+═══════════════════════════════════════════════════ */
+const DB_NAME  = 'ehs_kpi_db';
+const DB_STORE = 'kpi_data';
+const DB_KEY   = 'saved';
 
-function saveToStorage() {
-  const data = {};
-  document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
-    data[inp.id] = inp.value;
+/* IndexedDB 열기 */
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = e => {
+      e.target.result.createObjectStore(DB_STORE);
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
   });
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(data));
-  } catch(e) {
-    console.warn('localStorage 저장 실패:', e);
-  }
 }
 
+/* 모든 값 수집 (숫자 입력 + 카드 색상) */
+function collectAllData() {
+  const d = {};
+  document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
+    if (inp.id) d[inp.id] = inp.value;
+  });
+  CARD_KEYS.forEach(key => {
+    const card = document.getElementById('card-' + key);
+    if (!card) return;
+    for (const c of COLOR_OPTIONS) {
+      if (card.classList.contains(c)) { d['__c_' + key] = c; break; }
+    }
+  });
+  return d;
+}
+
+/* IndexedDB 에 저장 */
+function saveToStorage() {
+  const data = collectAllData();
+  openDB().then(db => {
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).put(data, DB_KEY);
+  }).catch(e => {
+    /* IndexedDB 실패 시 localStorage fallback */
+    try { localStorage.setItem('ehs_kpi_v1', JSON.stringify(data)); } catch(_) {}
+  });
+}
+
+/* IndexedDB 에서 불러오기 */
 function loadFromStorage() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return false;
-    const data = JSON.parse(raw);
-    Object.entries(data).forEach(([id, val]) => {
-      const el = document.getElementById(id);
-      if (el) el.value = val;
+  return new Promise(resolve => {
+    openDB().then(db => {
+      const tx  = db.transaction(DB_STORE, 'readonly');
+      const req = tx.objectStore(DB_STORE).get(DB_KEY);
+      req.onsuccess = e => {
+        const d = e.target.result;
+        if (d && Object.keys(d).length) resolve(d);
+        else resolve(null);
+      };
+      req.onerror = () => resolve(null);
+    }).catch(() => {
+      /* fallback: localStorage */
+      try {
+        const raw = localStorage.getItem('ehs_kpi_v1');
+        resolve(raw ? JSON.parse(raw) : null);
+      } catch(_) { resolve(null); }
     });
-    return true;
-  } catch(e) {
-    console.warn('localStorage 불러오기 실패:', e);
-    return false;
-  }
+  });
 }
 
+/* 저장 데이터를 DOM 에 적용 */
+function restoreAllData(d) {
+  if (!d) return false;
+  Object.entries(d).forEach(([id, val]) => {
+    if (id.startsWith('__c_')) return;
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+  CARD_KEYS.forEach(key => {
+    const col = d['__c_' + key] || CARD_COLOR_DEFAULTS[key];
+    applyCardColor(key, col);
+  });
+  return true;
+}
+
+/* IndexedDB 초기화 */
 function clearStorage() {
-  try { localStorage.removeItem(LS_KEY); } catch(e) {}
+  openDB().then(db => {
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).delete(DB_KEY);
+  }).catch(() => {
+    try { localStorage.removeItem('ehs_kpi_v1'); } catch(_) {}
+  });
+}
+
+/* 카드 색상 DOM 적용 (저장 없음, 순수 UI) */
+function applyCardColor(key, color) {
+  const card = document.getElementById('card-' + key);
+  if (!card) return;
+  COLOR_OPTIONS.forEach(c => {
+    card.classList.remove(c);
+    card.classList.remove('border-' + c);
+  });
+  card.classList.add(color);
+  card.classList.add('border-' + color);
+  /* 편집패널 버튼 */
+  COLOR_OPTIONS.forEach(c => {
+    const pb = document.getElementById('cpb-' + key + '-' + c);
+    if (pb) pb.classList.toggle('ep-active', c === color);
+  });
+  /* 카드 내 inline 버튼 */
+  const picker = card.querySelector('.card-color-picker');
+  if (picker) {
+    picker.querySelectorAll('.color-btn').forEach(b => {
+      b.classList.toggle('active', b.classList.contains('cb-' + color));
+    });
+  }
+  /* 숫자 색상 */
+  const valEl = document.getElementById('v-' + key);
+  if (valEl) {
+    valEl.classList.remove('danger', 'neutral');
+    valEl.style.color = '';
+    if (color === 'red')   valEl.classList.add('danger');
+    else if (color === 'amber') valEl.style.color = 'var(--amber)';
+  }
 }
 
 /* ── APPLY VALUES ───────────────────────────────── */
@@ -1535,12 +1632,11 @@ function applyValues(silent = false) {
     }
   });
 
-  // 저장
+  // IndexedDB 에 저장
   saveToStorage();
 
   if (silent) return;
 
-  // Flash applied
   const btn = document.querySelector('.ep-apply-btn');
   btn.textContent = '✓ 저장 & 적용 완료!';
   btn.style.background = 'var(--green)';
@@ -1549,7 +1645,6 @@ function applyValues(silent = false) {
     btn.style.background = '';
   }, 1800);
 
-  // 저장 알림 뱃지 표시
   showSavedBadge();
 }
 
@@ -1568,7 +1663,7 @@ function showSavedBadge() {
     `;
     document.body.appendChild(badge);
   }
-  badge.innerHTML = '💾 값이 자동 저장되었습니다 — 다음에 열어도 유지됩니다';
+  badge.innerHTML = '💾 저장 완료 — 브라우저에 영구 보관됩니다 (쿠키 삭제와 무관)';
   badge.style.opacity = '1';
   clearTimeout(badge._timer);
   badge._timer = setTimeout(() => { badge.style.opacity = '0'; }, 2800);
@@ -1703,85 +1798,38 @@ function switchTab(idx, btn) {
 const CARD_KEYS = ['fatal','report','lwd','rate','fire'];
 const COLOR_OPTIONS = ['green','amber','red'];
 const CARD_COLOR_DEFAULTS = { fatal:'green', report:'green', lwd:'green', rate:'green', fire:'red' };
-const LS_COLOR_KEY = 'ehs_kpi_card_colors_v1';
 
-function setCardColor(cardKey, color, btnEl, panelBtnId) {
-  const card = document.getElementById('card-' + cardKey);
-  if (!card) return;
-  // Remove old color classes
-  COLOR_OPTIONS.forEach(c => {
-    card.classList.remove(c);
-    card.classList.remove('border-' + c);
-  });
-  card.classList.add(color);
-  card.classList.add('border-' + color);
-
-  // Update active state on card-inline picker buttons
-  const picker = card.querySelector('.card-color-picker');
-  if (picker) {
-    picker.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-    if (btnEl) btnEl.classList.add('active');
-  }
-
-  // Update active state on edit panel buttons
-  COLOR_OPTIONS.forEach(c => {
-    const pb = document.getElementById('cpb-' + cardKey + '-' + c);
-    if (pb) pb.classList.remove('ep-active');
-  });
-  const activePb = document.getElementById('cpb-' + cardKey + '-' + color);
-  if (activePb) activePb.classList.add('ep-active');
-
-  // Update stat-value color
-  const valEl = document.getElementById('v-' + cardKey);
-  if (valEl) {
-    valEl.classList.remove('danger','neutral');
-    valEl.style.color = '';
-    if (color === 'red') valEl.classList.add('danger');
-    else if (color === 'amber') valEl.style.color = 'var(--amber)';
-  }
-  saveCardColors();
+function setCardColor(cardKey, color, btnEl) {
+  applyCardColor(cardKey, color);
+  saveToStorage();
 }
 
-function saveCardColors() {
-  const colors = {};
-  CARD_KEYS.forEach(key => {
-    const card = document.getElementById('card-' + key);
-    if (!card) return;
-    for (const c of COLOR_OPTIONS) {
-      if (card.classList.contains(c)) { colors[key] = c; break; }
-    }
-  });
-  try { localStorage.setItem(LS_COLOR_KEY, JSON.stringify(colors)); } catch(e) {}
-}
+function saveCardColors() { saveToStorage(); }
 
 function loadCardColors() {
-  try {
-    const raw = localStorage.getItem(LS_COLOR_KEY);
-    const saved = raw ? JSON.parse(raw) : {};
-    CARD_KEYS.forEach(key => {
-      const color = saved[key] || CARD_COLOR_DEFAULTS[key];
-      const card = document.getElementById('card-' + key);
-      if (!card) return;
-      const picker = card.querySelector('.card-color-picker');
-      const targetBtn = picker ? picker.querySelector('.cb-' + color) : null;
-      setCardColor(key, color, targetBtn);
-    });
-  } catch(e) {}
+  /* 기본색 먼저 적용 — 실제 복원은 initDashboard 의 비동기 loadFromStorage 에서 */
+  CARD_KEYS.forEach(key => applyCardColor(key, CARD_COLOR_DEFAULTS[key]));
 }
 
 /* ── FOOTER ──────────────────────────────────────── */
 document.getElementById('footer-year').textContent = new Date().getFullYear() + ' EHS Team';
 
-// Store defaults (원래 HTML에 정의된 기본값 기억)
+(function() {
+  const now = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('asof-date').textContent = 'As of ' + months[now.getMonth()] + '. ' + now.getFullYear();
+})();
+
 document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
   inp.setAttribute('data-default', inp.value);
 });
 
 /* ── AUTO-LOAD ON START ──────────────────────────── */
 (function initDashboard() {
-  loadCardColors();
-  const restored = loadFromStorage();
-  if (restored) {
+  loadCardColors(); // 기본색 먼저
+
+  loadFromStorage().then(d => {
+    if (!restoreAllData(d)) return;
     applyValues(true);
     setTimeout(() => {
       let badge = document.createElement('div');
@@ -1793,14 +1841,14 @@ document.querySelectorAll('.ep-body input[type="number"]').forEach(inp => {
         'display:flex','align-items:center','gap:8px','white-space:nowrap',
         'transition:opacity 0.5s'
       ].join(';');
-      badge.textContent = '\uD83D\uDD04 저장된 데이터를 불러왔습니다';
+      badge.textContent = '🔄 저장된 데이터를 불러왔습니다';
       document.body.appendChild(badge);
       setTimeout(() => {
         badge.style.opacity = '0';
         setTimeout(() => badge.remove(), 600);
       }, 2500);
-    }, 600);
-  }
+    }, 400);
+  });
 })();
 </script>
 
